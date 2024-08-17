@@ -12,7 +12,7 @@ type Config struct {
 		Port  string `env:"SERVER_PORT" 	env-default:"55677"`
 		Host  string `env:"SERVER_HOST" 	env-default:"localhost"`
 		Admin string `env:"SERVER_ADMIN" 	env-default:"admin"`
-		Pwd   string `env:"SERVER_PWD" 	env-default:"admin"`
+		Pwd   string `env:"SERVER_PWD" 		env-default:"admin"`
 	}
 	Database struct {
 		Port string `env:"DB_PORT"		env-default:"5432"`

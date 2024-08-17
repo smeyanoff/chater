@@ -1,7 +1,7 @@
 package api
 
 import (
-	"chater/internal/db"
+	"chater/internal/infrastructure/db"
 	"encoding/json"
 	"net/http"
 
