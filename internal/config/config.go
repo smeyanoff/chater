@@ -8,36 +8,40 @@ import (
 )
 
 type Config struct {
-	Server struct {
-		Port  string `env:"SERVER_PORT" 	env-default:"55677"`
-		Host  string `env:"SERVER_HOST" 	env-default:"localhost"`
-		Admin string `env:"SERVER_ADMIN" 	env-default:"admin"`
-		Pwd   string `env:"SERVER_PWD" 		env-default:"admin"`
+	App struct {
+		Port  string `env:"APP_PORT" 	env-default:"55677"`
+		Host  string `env:"APP_HOST" 	env-default:"localhost"`
+		Admin string `env:"APP_ADMIN" 	env-default:"admin"`
+		Pwd   string `env:"APP_PWD" 	env-default:"admin"`
 	}
 	Database struct {
-		Port string `env:"DB_PORT"		env-default:"5432"`
-		Host string `env:"DB_HOST"		env-default:"localhost"`
-		User string `env:"DB_USER"		env-default:"user"`
-		Pwd  string `env:"DB_PWD"		env-default:"user"`
+		Port int    `env:"POSTGRES_PORT"		env-default:"5432"`
+		Host string `env:"POSTGRES_HOST"		env-default:"localhost"`
+		DB   string `env:"POSTGRES_DB"			env-default:"chater"`
+		User string `env:"POSTGRES_USER"		env-default:"user"`
+		Pwd  string `env:"POSTGRES_PASSWORD"	env-default:"user"`
 	}
-	APIKeys struct {
+	Auth struct {
+		JWT struct {
+			Key             string `env: JWT_KEY`
+			ExpirationTimeH int    `env: JWT_EXP_TIME env-default:"72"`
+		}
 		OpenAIKey string `env: OPENAIKEY`
 	}
 }
 
 var (
-	cfg    Config
-	once   sync.Once
-	logger log.Logger
+	cfg  Config
+	once sync.Once
 )
 
 func LoadConfig() *Config {
 	once.Do(func() {
 		err := cleanenv.ReadEnv(&cfg)
 		if err != nil {
-			logger.Printf("config doesn't load: %s", err)
+			log.Printf("config doesn't load: %s", err)
 		}
 	})
-	logger.Println("config has loaded")
+	log.Println("config has loaded")
 	return &cfg
 }

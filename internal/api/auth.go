@@ -1,46 +1,57 @@
+// internal/api/auth_handler.go
 package api
 
 import (
-	"chater/internal/infrastructure/db"
+	"chater/internal/domain/service"
 	"encoding/json"
 	"net/http"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
-type Credentials struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+type AuthHandler struct {
+	authService *service.AuthService
 }
 
-// RegisterHandler обрабатывает запросы на регистрацию
-func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	var creds Credentials
-	err := json.NewDecoder(r.Body).Decode(&creds)
-	if err != nil {
+func NewAuthHandler(authService *service.AuthService) *AuthHandler {
+	return &AuthHandler{authService: authService}
+}
+
+func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Username string `json:"username"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
-	// Проверка, существует ли пользователь
-	if db.UserExists(creds.Username) {
-		http.Error(w, "User already exists", http.StatusBadRequest)
-		return
-	}
-
-	// Хэширование пароля
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(creds.Password), bcrypt.DefaultCost)
+	err := h.authService.Register(r.Context(), req.Username, req.Email, req.Password)
 	if err != nil {
-		http.Error(w, "Error hashing password", http.StatusInternalServerError)
-		return
-	}
-
-	// Сохранение пользователя в базе данных
-	err = db.CreateUser(creds.Username, string(hashedPassword))
-	if err != nil {
-		http.Error(w, "Error creating user", http.StatusInternalServerError)
+		http.Error(w, "Error registering user", http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
+}
+
+func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	token, err := h.authService.Login(r.Context(), req.Username, req.Password)
+	if err != nil {
+		http.Error(w, "Invalid username or password", http.StatusUnauthorized)
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]string{"token": token})
 }
