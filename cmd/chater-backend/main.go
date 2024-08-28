@@ -8,10 +8,30 @@ import (
 	"chater/internal/infrastructure/db"
 	"chater/internal/infrastructure/repository"
 
+	"github.com/gin-gonic/gin"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "chater/docs"
+
 	"log"
-	"net/http"
 )
 
+// @title ChatGPT Backend API
+// @version 1.0
+// @description This is a sample server for a chat backend with JWT authentication.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:54321
+// @BasePath /
 func main() {
 	cfg := config.LoadConfig()
 
@@ -30,9 +50,17 @@ func main() {
 	authService := service.NewAuthService(userRepo, cfg.Auth.JWT.Key, cfg.Auth.JWT.ExpirationTimeH)
 	authHandler := api.NewAuthHandler(authService)
 
-	http.HandleFunc("/register", authHandler.Register)
-	http.HandleFunc("/login", authHandler.Login)
+	// Используем Gin для роутинга
+	router := gin.Default()
 
-	log.Printf("App is running on port %s", cfg.App.Port)
-	log.Fatal(http.ListenAndServe(cfg.App.Host+":"+cfg.App.Port, nil))
+	// Настройка маршрутов
+	router.POST("/register", authHandler.Register)
+	router.POST("/login", authHandler.Login)
+
+	// Настройка маршрута для Swagger UI
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// Запуск HTTP-сервера
+	log.Printf("Server is running on port %s", cfg.App.Port)
+	log.Fatal(router.Run(":" + cfg.App.Port))
 }

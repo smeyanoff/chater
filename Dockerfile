@@ -13,8 +13,9 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /app/chater-backend cmd/chater-backend/
 # Используем минимальный образ для финального контейнера
 FROM alpine:3.20
 
-WORKDIR /root/
+WORKDIR /app/
 
 COPY --from=builder /app/chater-backend .
+COPY --from=builder /app/docs ./docs
 
 CMD ["./chater-backend"]
