@@ -4,9 +4,9 @@ package main
 import (
 	"chater/internal/api"
 	"chater/internal/config"
-	"chater/internal/domain/service"
 	"chater/internal/infrastructure/db"
 	"chater/internal/infrastructure/repository"
+	"chater/internal/service"
 
 	"github.com/gin-gonic/gin"
 

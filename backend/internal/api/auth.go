@@ -2,7 +2,7 @@
 package api
 
 import (
-	"chater/internal/domain/service"
+	"chater/internal/service"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

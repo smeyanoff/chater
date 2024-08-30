@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"chater/internal/domain/models"
+	models "chater/internal/domain/entity"
 	"chater/internal/domain/repository"
 	"context"
 

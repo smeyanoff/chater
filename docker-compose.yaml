@@ -10,10 +10,10 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     networks:
-      - backend
+      - chater
 
-  app:
-    build: .
+  backend:
+    build: ./backend
     env_file: 
       - .env
     ports:
@@ -21,10 +21,21 @@ services:
     depends_on:
       - db
     networks:
+      - chater
+  
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - db
       - backend
+    networks:
+      - chater
 
 volumes:
   db_data:
 
 networks:
-  backend:
+  chater:
+    driver: bridge

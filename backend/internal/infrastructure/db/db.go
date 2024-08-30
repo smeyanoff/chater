@@ -2,7 +2,7 @@ package db
 
 import (
 	"chater/internal/config"
-	"chater/internal/domain/models"
+	models "chater/internal/domain/entity"
 	"fmt"
 	"log"
 	"time"
