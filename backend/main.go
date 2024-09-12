@@ -7,7 +7,9 @@ import (
 	"chater/internal/infrastructure/db"
 	"chater/internal/infrastructure/repository"
 	"chater/internal/service"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
 	swaggerFiles "github.com/swaggo/files"
@@ -47,11 +49,20 @@ func main() {
 	}
 
 	userRepo := repository.NewGormUserRepository(database)
-	authService := service.NewAuthService(userRepo, cfg.Auth.JWT.Key, cfg.Auth.JWT.ExpirationTimeH)
+	authService := service.NewAuthService(userRepo, cfg.Auth.JWTKey, cfg.Auth.JWTKeyExpirationTimeH)
 	authHandler := api.NewAuthHandler(authService)
 
 	// Используем Gin для роутинга
 	router := gin.Default()
+
+	// Настройка CORS через данные из конфигурации
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     cfg.CORS.AllowOrigins,
+		AllowMethods:     cfg.CORS.AllowMethods,
+		AllowHeaders:     cfg.CORS.AllowHeaders,
+		AllowCredentials: cfg.CORS.AllowCredentials,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	// Настройка маршрутов
 	router.POST("/register", authHandler.Register)
@@ -61,6 +72,6 @@ func main() {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Запуск HTTP-сервера
-	log.Printf("Server is running on port %s", cfg.App.Port)
-	log.Fatal(router.Run(":" + cfg.App.Port))
+	log.Printf("Server is running on port %s", cfg.App.AppPort)
+	log.Fatal(router.Run(":" + cfg.App.AppPort))
 }

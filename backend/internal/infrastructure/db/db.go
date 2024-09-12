@@ -20,7 +20,7 @@ func ConnectDB(cfg *config.Config) (*gorm.DB, error) {
 	retryDelay := time.Duration(36000)
 
 	dsn := fmt.Sprintf("host=%s user=%s password=%s database=%s port=%d sslmode=disable",
-		cfg.Database.Host, cfg.Database.User, cfg.Database.Pwd, cfg.Database.DB, cfg.Database.Port)
+		cfg.Database.DBHost, cfg.Database.DBUser, cfg.Database.DBPwd, cfg.Database.DBTable, cfg.Database.DBPort)
 
 	for i := 0; i < maxRetries; i++ {
 		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})

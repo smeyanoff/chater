@@ -1,0 +1,29 @@
+app:
+  app_port: "8080"
+  app_host: "localhost"
+  app_admin: "admin"
+  app_pwd: "admin123"
+
+database:
+  db_port: 5432
+  db_host: "localhost"
+  db_table: "my_table"
+  db_user: "dbuser"
+  db_pwd: "dbpassword"
+
+auth:
+  jwt_key: "your-secret-jwt-key"
+  jwt_key_expiration_time_h: 72
+  openai_key: "your-openai-api-key"
+
+cors:
+  allow_origins:
+    - "http://${CHATER_FRONTEND_HOST}:${CHATER_FRONTEND_PORT}"
+  allow_methods:
+    - "GET"
+    - "POST"
+    - "PUT"
+  allow_headers:
+    - "Content-Type"
+    - "Authorization"
+  allow_credentials: true

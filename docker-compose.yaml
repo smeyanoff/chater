@@ -4,13 +4,13 @@ services:
   db:
     image: postgres:13
     environment:
-      - POSTGRES_USER=${DATABASE_USER}
-      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
-      - POSTGRES_DB=${DATABASE_TABLE}
-      - POSTGRES_PORT=${DATABASE_PORT}
-      - POSTGRES_HOST=${DATABASE_HOST}
+      - POSTGRES_USER=${CHATER_DB_USER}
+      - POSTGRES_PASSWORD=${CHATER_DB_PWD}
+      - POSTGRES_DB=${CHATER_DB_TABLE}
+      - POSTGRES_PORT=${CHATER_DB_PORT}
+      - POSTGRES_HOST=${CHATER_DB_HOST}
     ports:
-      - "${DATABASE_PORT}:${DATABASE_PORT}"
+      - "${CHATER_DB_PORT}:${CHATER_DB_PORT}"
     volumes:
       - db_data:/var/lib/postgresql/data
     networks:
@@ -18,18 +18,10 @@ services:
 
   backend:
     build: ./backend
-    environment:
-      - APP_PORT=${BACKEND_PORT}
-      - APP_HOST=${BACKEND_HOST}
-      - JWT_KEY=${JWT_KEY}
-      - OPENAIKEY=${OPENAIKEY}
-      - DATABASE_PORT=${DATABASE_PORT}
-      - DATABASE_HOST=${DATABASE_HOST}
-      - DATABASE_USER=${DATABASE_USER}
-      - DATABASE_DB=${DATABASE_TABLE}
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+    env_file:
+      - .env
     ports:
-      - "${BACKEND_PORT}:${BACKEND_PORT}"
+      - "${CHATER_APP_PORT}:${CHATER_APP_PORT}"
     depends_on:
       - db
     networks:
@@ -39,9 +31,9 @@ services:
     build:
       context: ./frontend
     environment:
-      - __VUE_APP_API_URL__=http://${BACKEND_HOST}:${BACKEND_PORT}
+      - __VUE_APP_API_URL__=http://${CHATER_APP_HOST}:${CHATER_APP_PORT}
     ports:
-      - "3000:80"
+      - "${CHATER_FRONTEND_PORT}:80"
     depends_on:
       - db
       - backend

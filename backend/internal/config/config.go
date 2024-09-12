@@ -2,49 +2,11 @@ package config
 
 import (
 	"log"
+	"strings"
 	"sync"
 
-	"github.com/ilyakaznacheev/cleanenv"
+	"github.com/spf13/viper"
 )
-
-type Config struct {
-	App      AppConfig
-	Database DatabaseConfig
-	Auth     AuthConfig
-	Cors     CORSConfig
-}
-
-type AppConfig struct {
-	Port  string `env:"APP_PORT" 	env-default:"55677" env-upd`
-	Host  string `env:"APP_HOST" 	env-default:"localhost"`
-	Admin string `env:"APP_ADMIN" 	env-default:"admin"`
-	Pwd   string `env:"APP_PWD" 	env-default:"admin"`
-}
-
-type DatabaseConfig struct {
-	Port int    `env:"DATABASE_PORT"		env-default:"5432"`
-	Host string `env:"DATABASE_HOST"		env-default:"localhost"`
-	DB   string `env:"DATABASE_DB"			env-default:"chater"`
-	User string `env:"DATABASE_USER"		env-default:"user"`
-	Pwd  string `env:"DATABASE_PASSWORD"	env-default:"user"`
-}
-
-type AuthConfig struct {
-	JWT       JWTConfig
-	OpenAIKey string `env: OPENAIKEY`
-}
-
-type JWTConfig struct {
-	Key             string `env: JWT_KEY`
-	ExpirationTimeH int    `env: JWT_EXP_TIME env-default:"72"`
-}
-
-type CORSConfig struct {
-	AllowOrigins     []string `yaml: "allowOrigins"`
-	AllowMethods     []string `yaml: "allowMethods"`
-	AllowHeaders     []string `yaml: "allowHeaders"`
-	AllowCredentials bool     `yaml: "allowCredentials"`
-}
 
 var (
 	cfg  Config
@@ -53,15 +15,31 @@ var (
 
 func LoadConfig() *Config {
 	once.Do(func() {
-		err := cleanenv.ReadEnv(&cfg)
-		if err != nil {
-			log.Printf("err read env cfg: %s", err)
+		// Настраиваем Viper для работы с YAML-файлом
+		viper.SetConfigName("config")    // Имя файла конфигурации (без расширения)
+		viper.SetConfigType("yaml")      // Тип файла конфигурации
+		viper.AddConfigPath("./config/") // Директория, где искать файл конфигурации
+
+		viper.SetEnvPrefix("chater")
+		replacer := strings.NewReplacer("", "_")
+		viper.SetEnvKeyReplacer(replacer)
+
+		// Загрузка переменных окружения (они могут переопределять значения из файла)
+		viper.AutomaticEnv()
+
+		// Загрузка конфигурации из файла
+		if err := viper.ReadInConfig(); err != nil {
+			log.Fatalf("err reading config file: %v", err)
 		}
-		err = cleanenv.ReadConfig("./config/cors-config.yaml", cfg)
-		if err != nil {
-			log.Printf("err read cors cfg: %s", err)
+
+		// Сопоставляем значения с нашей структурой конфигурации
+		if err := viper.Unmarshal(&cfg); err != nil {
+			log.Fatalf("err config decode: %v", err)
 		}
+
+		log.Println("config downloaded")
+		log.Printf("config: %+v", cfg)
 	})
-	log.Println("config has been loaded")
+
 	return &cfg
 }
