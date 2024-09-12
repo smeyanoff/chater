@@ -1,0 +1,11 @@
+allowOrigins:
+  - "http://localhost:3000"
+allowMethods:
+  - "GET"
+  - "POST"
+  - "PUT"
+  - "DELETE"
+allowHeaders:
+  - "Content-Type"
+  - "Authorization"
+allowCredentials: true

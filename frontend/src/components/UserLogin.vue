@@ -26,9 +26,10 @@ const handleLogin = () => {
     username: username.value,
     password: password.value,
   }
+  const apiUrl = window.config.VUE_APP_API_URL;
 
   // Пример POST-запроса на сервер для логина
-  fetch('http://backend:54321/login', {
+  fetch(`${apiUrl}/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -36,8 +37,12 @@ const handleLogin = () => {
     body: JSON.stringify(loginData),
   })
     .then(response => {
+      console.log('Response status:', response.status)  // Лог статуса ответа
       if (!response.ok) {
-        throw new Error('Failed to login')
+        return response.json().then(err => {
+          console.log('Error in response:', err)  // Лог ошибки с сервера
+          throw new Error('Failed to register')
+        })
       }
       return response.json()
     })
@@ -53,7 +58,7 @@ const handleLogin = () => {
 </script>
 
 <style scoped>
-.login {
+.user-login {
   max-width: 300px;
   margin: 50px auto;
   padding: 20px;

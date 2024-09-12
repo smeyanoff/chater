@@ -17,7 +17,7 @@ nav {
 }
 
 nav a {
-  color: white;
+  color: rgb(255, 255, 255);
   text-decoration: none;
 }
 

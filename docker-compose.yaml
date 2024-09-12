@@ -3,10 +3,14 @@ version: '3.8'
 services:
   db:
     image: postgres:13
-    env_file: 
-      - .env
+    environment:
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_TABLE}
+      - POSTGRES_PORT=${DATABASE_PORT}
+      - POSTGRES_HOST=${DATABASE_HOST}
     ports:
-      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+      - "${DATABASE_PORT}:${DATABASE_PORT}"
     volumes:
       - db_data:/var/lib/postgresql/data
     networks:
@@ -14,17 +18,28 @@ services:
 
   backend:
     build: ./backend
-    env_file: 
-      - .env
+    environment:
+      - APP_PORT=${BACKEND_PORT}
+      - APP_HOST=${BACKEND_HOST}
+      - JWT_KEY=${JWT_KEY}
+      - OPENAIKEY=${OPENAIKEY}
+      - DATABASE_PORT=${DATABASE_PORT}
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_DB=${DATABASE_TABLE}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
     ports:
-      - "${APP_PORT}:${APP_PORT}"
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
     depends_on:
       - db
     networks:
       - chater
   
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+    environment:
+      - __VUE_APP_API_URL__=http://${BACKEND_HOST}:${BACKEND_PORT}
     ports:
       - "3000:80"
     depends_on:

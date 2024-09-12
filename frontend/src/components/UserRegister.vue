@@ -31,10 +31,12 @@ const handleRegister = () => {
     username: username.value,
     email: email.value,
     password: password.value,
-  }
+  };
+  const apiUrl = window.config.VUE_APP_API_URL;
+  console.log("ApiUrl:", apiUrl)
 
   // Пример POST-запроса на сервер для регистрации
-  fetch('http://backend:54321/register', {
+  fetch(`${apiUrl}/register`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -59,7 +61,7 @@ const handleRegister = () => {
 </script>
 
 <style scoped>
-.register {
+.user-register {
   max-width: 300px;
   margin: 50px auto;
   padding: 20px;

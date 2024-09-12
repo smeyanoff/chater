@@ -13,9 +13,10 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o ./backend main.go
 # Используем минимальный образ для финального контейнера
 FROM alpine:3.20
 
-WORKDIR /app/
+WORKDIR /app
 
 COPY --from=builder /app/backend .
+COPY --from=builder /app/internal/config/cors-config.yaml ./config
 COPY --from=builder /app/docs ./docs
 
 CMD ["./backend"]
