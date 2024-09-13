@@ -16,7 +16,7 @@ FROM alpine:3.20
 WORKDIR /app
 
 COPY --from=builder /app/backend .
-COPY --from=builder /app/internal/config/config.yaml ./config/config.yaml
+COPY --from=builder /app/internal/config/config.yaml /app/internal/config/config.yaml
 COPY --from=builder /app/docs ./docs
 
 CMD ["./backend"]

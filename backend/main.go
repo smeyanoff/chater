@@ -72,6 +72,6 @@ func main() {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Запуск HTTP-сервера
-	log.Printf("Server is running on port %s", cfg.App.AppPort)
-	log.Fatal(router.Run(":" + cfg.App.AppPort))
+	log.Printf("Server is running on port %s", cfg.App.Port)
+	log.Fatal(router.Run(":" + cfg.App.Port))
 }

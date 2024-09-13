@@ -1,25 +1,25 @@
 package config
 
 type Config struct {
-	App      AppConfig
-	Database DatabaseConfig
-	Auth     AuthConfig
-	CORS     CORSConfig
+	App  AppConfig
+	DB   DatabaseConfig
+	Auth AuthConfig
+	CORS CORSConfig
 }
 
 type AppConfig struct {
-	AppPort  string
-	AppHost  string
-	AppAdmin string
-	AppPwd   string
+	Port  string
+	Host  string
+	Admin string
+	Pwd   string
 }
 
 type DatabaseConfig struct {
-	DBPort  int
-	DBHost  string
-	DBTable string
-	DBUser  string
-	DBPwd   string
+	Port  int
+	Host  string
+	Table string
+	User  string
+	Pwd   string
 }
 
 type AuthConfig struct {
