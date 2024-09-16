@@ -29,7 +29,7 @@ const handleLogin = () => {
   const apiUrl = window.config.VUE_APP_API_URL;
 
   // Пример POST-запроса на сервер для логина
-  fetch(`${apiUrl}/login`, {
+  fetch(`${apiUrl}/auth/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

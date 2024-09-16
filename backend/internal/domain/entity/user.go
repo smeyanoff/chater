@@ -1,4 +1,4 @@
-package models
+package entities
 
 import "gorm.io/gorm"
 
@@ -9,4 +9,5 @@ type User struct {
 	Email        string `gorm:"unique;not null"`
 	Organization string
 	Department   string
+	Chats        []*Chat `gorm:"many2many:chat_users;"`
 }

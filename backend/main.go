@@ -48,15 +48,11 @@ func main() {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
 
-	userRepo := repository.NewGormUserRepository(database)
-	authService := service.NewAuthService(userRepo, cfg.Auth.JWTKey, cfg.Auth.JWTKeyExpirationTimeH)
-	authHandler := api.NewAuthHandler(authService)
-
 	// Используем Gin для роутинга
-	router := gin.Default()
+	r := gin.Default()
 
 	// Настройка CORS через данные из конфигурации
-	router.Use(cors.New(cors.Config{
+	r.Use(cors.New(cors.Config{
 		AllowOrigins:     cfg.CORS.AllowOrigins,
 		AllowMethods:     cfg.CORS.AllowMethods,
 		AllowHeaders:     cfg.CORS.AllowHeaders,
@@ -64,14 +60,25 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	// Настройка маршрутов
-	router.POST("/register", authHandler.Register)
-	router.POST("/login", authHandler.Login)
+	// users
+	userRepo := repository.NewGormUserRepository(database)
+	authService := service.NewAuthService(userRepo, cfg.Auth.JWTKey, cfg.Auth.JWTKeyExpirationTimeH)
+	authHandler := api.NewAuthController(authService)
+
+	r.POST("auth/register", authHandler.Register)
+	r.POST("auth/login", authHandler.Login)
+
+	// chats
+	chatRepo := repository.NewGormChatRepository(database)
+	chatService := service.NewChatService(chatRepo)
+	chatController := api.NewChatController(chatService)
+
+	r.GET("chats/:user_id", chatController.GetChatsByUserIDHandler)
 
 	// Настройка маршрута для Swagger UI
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Запуск HTTP-сервера
 	log.Printf("Server is running on port %s", cfg.App.Port)
-	log.Fatal(router.Run(":" + cfg.App.Port))
+	log.Fatal(r.Run(":" + cfg.App.Port))
 }

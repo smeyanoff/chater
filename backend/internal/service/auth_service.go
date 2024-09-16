@@ -2,6 +2,7 @@
 package service
 
 import (
+	"chater/internal/domain/auth"
 	models "chater/internal/domain/entity"
 	"chater/internal/domain/repository"
 	"context"
@@ -24,6 +25,28 @@ func NewAuthService(userRepo repository.UserRepository, jwtSecret string, expera
 		jwtSecret:      jwtSecret,
 		experationTime: experationTime,
 	}
+}
+
+func (s *AuthService) generateToken(userID uint) (string, error) {
+	// Определяем claims
+	claims := auth.Claims{
+		UserID: userID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * time.Duration(s.experationTime))),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+
+	// Создаем токен с claims
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// Подписываем токен секретным ключом
+	tokenString, err := token.SignedString([]byte(s.jwtSecret))
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
 }
 
 func (s *AuthService) Register(ctx context.Context, username, email, password string) error {
@@ -52,12 +75,7 @@ func (s *AuthService) Login(ctx context.Context, username, password string) (str
 		return "", errors.New("invalid username or password")
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": user.ID,
-		"exp":     time.Now().Add(time.Hour * time.Duration(s.experationTime)).Unix(),
-	})
-
-	tokenString, err := token.SignedString([]byte(s.jwtSecret))
+	tokenString, err := s.generateToken(user.ID)
 	if err != nil {
 		return "", err
 	}

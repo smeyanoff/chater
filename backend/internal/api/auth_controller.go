@@ -1,4 +1,4 @@
-// internal/api/auth_handler.go
+// internal/api/auth_Controller.go
 package api
 
 import (
@@ -8,12 +8,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type AuthHandler struct {
+type AuthController struct {
 	authService *service.AuthService
 }
 
-func NewAuthHandler(authService *service.AuthService) *AuthHandler {
-	return &AuthHandler{authService: authService}
+func NewAuthController(authService *service.AuthService) *AuthController {
+	return &AuthController{authService: authService}
 }
 
 // Register godoc
@@ -26,8 +26,8 @@ func NewAuthHandler(authService *service.AuthService) *AuthHandler {
 // @Success 201 {object} successResponse
 // @Failure 400 {object} errorResponse
 // @Failure 500 {object} errorResponse
-// @Router /register [post]
-func (h *AuthHandler) Register(c *gin.Context) {
+// @Router auth/register [post]
+func (h *AuthController) Register(c *gin.Context) {
 	var req registerRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, errorResponse{Error: err.Error()})
@@ -53,8 +53,8 @@ func (h *AuthHandler) Register(c *gin.Context) {
 // @Success 200 {object} tokenResponse
 // @Failure 400 {object} errorResponse
 // @Failure 401 {object} errorResponse
-// @Router /login [post]
-func (h *AuthHandler) Login(c *gin.Context) {
+// @Router auth/login [post]
+func (h *AuthController) Login(c *gin.Context) {
 	var req loginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, errorResponse{Error: err.Error()})

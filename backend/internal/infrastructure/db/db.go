@@ -3,6 +3,7 @@ package db
 import (
 	"chater/internal/config"
 	models "chater/internal/domain/entity"
+	_ "chater/internal/domain/valueobject"
 	"fmt"
 	"log"
 	"time"
@@ -38,8 +39,9 @@ func ConnectDB(cfg *config.Config) (*gorm.DB, error) {
 // AutoMigrate выполняет автоматическую миграцию всех моделей
 func AutoMigrate(db *gorm.DB) error {
 	err := db.AutoMigrate(
-		&models.User{}, // добавьте здесь все модели, которые нужно мигрировать
-		// &models.AnotherModel{}, // Пример: если есть другие модели, добавьте их сюда
+		&models.User{},
+		&models.Chat{},
+		&models.Message{},
 	)
 	if err != nil {
 		return err

@@ -36,7 +36,7 @@ const handleRegister = () => {
   console.log("ApiUrl:", apiUrl)
 
   // Пример POST-запроса на сервер для регистрации
-  fetch(`${apiUrl}/register`, {
+  fetch(`${apiUrl}/auth/register`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
