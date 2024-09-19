@@ -19,7 +19,7 @@ services:
   backend:
     build: ./backend
     env_file:
-      - .env
+      - .env.local
     ports:
       - "${CHATER_APP_PORT}:${CHATER_APP_PORT}"
     depends_on:
