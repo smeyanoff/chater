@@ -31,7 +31,7 @@ func (cc *ChatService) CreateChat(ctx context.Context, name string) (*models.Cha
 }
 
 func (cc *ChatService) GetUserChats(ctx context.Context, userId uint) ([]*models.Chat, error) {
-	models, err := cc.chatRepo.FindAllByUserId(ctx, userId)
+	models, err := cc.chatRepo.FindAllByUserIdWithLastMessage(ctx, userId)
 	if err != nil {
 		return nil, err
 	}

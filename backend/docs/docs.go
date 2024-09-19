@@ -24,7 +24,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/login": {
+        "/auth/login": {
             "post": {
                 "description": "Log in a user and return a JWT token",
                 "consumes": [
@@ -70,7 +70,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/register": {
+        "/auth/register": {
             "post": {
                 "description": "Register a new user with username, email, and password",
                 "consumes": [
@@ -115,9 +115,105 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/chats": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns a list of all chats that the authenticated user participates in, including chat members and recent messages.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chats"
+                ],
+                "summary": "Get all chats for the authenticated user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.chatsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "api.chatMember": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Идентификатор пользователя",
+                    "type": "integer"
+                },
+                "username": {
+                    "description": "Имя пользователя",
+                    "type": "string"
+                }
+            }
+        },
+        "api.chatResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "description": "Время создания чата",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Идентификатор чата",
+                    "type": "integer"
+                },
+                "members": {
+                    "description": "Список участников чата",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.chatMember"
+                    }
+                },
+                "messages": {
+                    "description": "Последние сообщения чата",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.messageDetail"
+                    }
+                },
+                "name": {
+                    "description": "Название чата",
+                    "type": "string"
+                },
+                "updated_at": {
+                    "description": "Время последнего обновления чата",
+                    "type": "string"
+                }
+            }
+        },
+        "api.chatsResponse": {
+            "type": "object",
+            "properties": {
+                "chats": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.chatResponse"
+                    }
+                }
+            }
+        },
         "api.errorResponse": {
             "type": "object",
             "properties": {
@@ -138,6 +234,31 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "api.messageDetail": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "description": "Содержание сообщения",
+                    "type": "string"
+                },
+                "created_at": {
+                    "description": "Время отправки сообщения",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Идентификатор сообщения",
+                    "type": "integer"
+                },
+                "sender": {
+                    "description": "Имя отправителя",
+                    "type": "string"
+                },
+                "sender_id": {
+                    "description": "Идентификатор отправителя",
+                    "type": "integer"
                 }
             }
         },
@@ -175,6 +296,13 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`

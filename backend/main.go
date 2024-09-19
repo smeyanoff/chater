@@ -32,6 +32,10 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+
 // @host localhost:54321
 // @BasePath /
 func main() {
@@ -60,6 +64,9 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
+	// Настройка маршрута для Swagger UI
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	// users
 	userRepo := repository.NewGormUserRepository(database)
 	authService := service.NewAuthService(userRepo, cfg.Auth.JWTKey, cfg.Auth.JWTKeyExpirationTimeH)
@@ -68,15 +75,19 @@ func main() {
 	r.POST("auth/register", authHandler.Register)
 	r.POST("auth/login", authHandler.Login)
 
+	// auth
+	jwtSecret := cfg.Auth.JWTKey
+	auth := api.JWTAuthMiddleware(jwtSecret)
+
+	// Маршруты, требующие аутентификации
+	r.Use(auth) // Подключаем middleware
+
 	// chats
 	chatRepo := repository.NewGormChatRepository(database)
 	chatService := service.NewChatService(chatRepo)
 	chatController := api.NewChatController(chatService)
 
-	r.GET("chats/:user_id", chatController.GetChatsByUserIDHandler)
-
-	// Настройка маршрута для Swagger UI
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r.GET("chats/", chatController.GetChatsForUser)
 
 	// Запуск HTTP-сервера
 	log.Printf("Server is running on port %s", cfg.App.Port)

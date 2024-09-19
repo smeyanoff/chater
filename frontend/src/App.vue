@@ -1,27 +1,23 @@
 <template>
   <div id="app">
     <nav>
-      <router-link to="/register">Register</router-link>
       <router-link to="/login">Login</router-link>
+      <router-link to="/register">Register</router-link>
     </nav>
-    <router-view />
+    <router-view></router-view>
   </div>
 </template>
 
-<style>
-nav {
-  display: flex;
-  justify-content: space-around;
-  background-color: #333;
-  padding: 10px;
-}
+<script lang="ts">
+import { defineComponent, ref } from 'vue'
 
-nav a {
-  color: rgb(255, 255, 255);
-  text-decoration: none;
-}
+export default defineComponent({
+  setup () {
+    const isAuthenticated = ref(!!localStorage.getItem('authToken')) // Проверяем токен в localStorage
 
-nav a:hover {
-  text-decoration: underline;
-}
-</style>
+    return {
+      isAuthenticated
+    }
+  }
+})
+</script>

@@ -9,5 +9,6 @@ type User struct {
 	Email        string `gorm:"unique;not null"`
 	Organization string
 	Department   string
-	Chats        []*Chat `gorm:"many2many:chat_users;"`
+	OwnChats     []*Chat `gorm:"foreignKey:OwnerID"`    // Явная связь с полем OwnerID в Chat
+	InChats      []*Chat `gorm:"many2many:chat_users;"` // Многие-ко-многим
 }

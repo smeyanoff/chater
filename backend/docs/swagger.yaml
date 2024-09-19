@@ -1,5 +1,46 @@
 basePath: /
 definitions:
+  api.chatMember:
+    properties:
+      id:
+        description: Идентификатор пользователя
+        type: integer
+      username:
+        description: Имя пользователя
+        type: string
+    type: object
+  api.chatResponse:
+    properties:
+      created_at:
+        description: Время создания чата
+        type: string
+      id:
+        description: Идентификатор чата
+        type: integer
+      members:
+        description: Список участников чата
+        items:
+          $ref: '#/definitions/api.chatMember'
+        type: array
+      messages:
+        description: Последние сообщения чата
+        items:
+          $ref: '#/definitions/api.messageDetail'
+        type: array
+      name:
+        description: Название чата
+        type: string
+      updated_at:
+        description: Время последнего обновления чата
+        type: string
+    type: object
+  api.chatsResponse:
+    properties:
+      chats:
+        items:
+          $ref: '#/definitions/api.chatResponse'
+        type: array
+    type: object
   api.errorResponse:
     properties:
       error:
@@ -14,6 +55,24 @@ definitions:
     required:
     - password
     - username
+    type: object
+  api.messageDetail:
+    properties:
+      content:
+        description: Содержание сообщения
+        type: string
+      created_at:
+        description: Время отправки сообщения
+        type: string
+      id:
+        description: Идентификатор сообщения
+        type: integer
+      sender:
+        description: Имя отправителя
+        type: string
+      sender_id:
+        description: Идентификатор отправителя
+        type: integer
     type: object
   api.registerRequest:
     properties:
@@ -52,7 +111,7 @@ info:
   title: ChatGPT Backend API
   version: "1.0"
 paths:
-  /login:
+  /auth/login:
     post:
       consumes:
       - application/json
@@ -82,7 +141,7 @@ paths:
       summary: Log in a user
       tags:
       - auth
-  /register:
+  /auth/register:
     post:
       consumes:
       - application/json
@@ -112,4 +171,33 @@ paths:
       summary: Register a new user
       tags:
       - auth
+  /chats:
+    get:
+      description: Returns a list of all chats that the authenticated user participates
+        in, including chat members and recent messages.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.chatsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all chats for the authenticated user
+      tags:
+      - chats
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

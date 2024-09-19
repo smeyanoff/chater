@@ -50,6 +50,7 @@ func (s *AuthService) generateToken(userID uint) (string, error) {
 }
 
 func (s *AuthService) Register(ctx context.Context, username, email, password string) error {
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return err

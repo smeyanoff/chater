@@ -2,6 +2,7 @@
 package api
 
 import (
+	_ "chater/internal/domain/auth"
 	"chater/internal/service"
 	"net/http"
 
@@ -26,7 +27,7 @@ func NewAuthController(authService *service.AuthService) *AuthController {
 // @Success 201 {object} successResponse
 // @Failure 400 {object} errorResponse
 // @Failure 500 {object} errorResponse
-// @Router auth/register [post]
+// @Router /auth/register [post]
 func (h *AuthController) Register(c *gin.Context) {
 	var req registerRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -53,7 +54,7 @@ func (h *AuthController) Register(c *gin.Context) {
 // @Success 200 {object} tokenResponse
 // @Failure 400 {object} errorResponse
 // @Failure 401 {object} errorResponse
-// @Router auth/login [post]
+// @Router /auth/login [post]
 func (h *AuthController) Login(c *gin.Context) {
 	var req loginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

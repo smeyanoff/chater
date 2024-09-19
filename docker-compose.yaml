@@ -27,18 +27,18 @@ services:
     networks:
       - chater
   
-  frontend:
-    build:
-      context: ./frontend
-    environment:
-      - __VUE_APP_API_URL__=http://${CHATER_APP_HOST}:${CHATER_APP_PORT}
-    ports:
-      - "3000:80"
-    depends_on:
-      - db
-      - backend
-    networks:
-      - chater
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #   environment:
+  #     - __VUE_APP_API_URL__=http://${CHATER_APP_HOST}:${CHATER_APP_PORT}
+  #   ports:
+  #     - "3000:80"
+  #   depends_on:
+  #     - db
+  #     - backend
+  #   networks:
+  #     - chater
 
 volumes:
   db_data:

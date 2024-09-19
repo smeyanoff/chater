@@ -32,14 +32,21 @@ func (r *gormChatRepository) FindAll(ctx context.Context) ([]*models.Chat, error
 	return chats, err
 }
 
-func (r *gormChatRepository) FindAllByUserId(ctx context.Context, userId uint) ([]*models.Chat, error) {
-	var user models.User
-	err := r.db.Preload("Chats").First(&user, userId).Error
+func (r *gormChatRepository) FindAllByUserIdWithLastMessage(ctx context.Context, userId uint) ([]*models.Chat, error) {
+	var chats []*models.Chat
+
+	// Загрузить чаты пользователя с последним сообщением для каждого чата
+	err := r.db.Preload("Messages", func(db *gorm.DB) *gorm.DB {
+		return db.Order("created_at DESC").Limit(1) // Загрузить только одно последнее сообщение
+	}).Joins("JOIN user_chats ON user_chats.chat_id = chats.id").
+		Where("user_chats.user_id = ?", userId).
+		Find(&chats).Error
+
 	if err != nil {
 		return nil, err
 	}
 
-	return user.Chats, nil
+	return chats, nil
 }
 
 func (r *gormChatRepository) Delete(ctx context.Context, id uint) error {
