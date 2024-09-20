@@ -5,6 +5,7 @@ import (
 	"chater/internal/domain/auth"
 	models "chater/internal/domain/entity"
 	"chater/internal/domain/repository"
+	"chater/internal/domain/validation"
 	"context"
 	"errors"
 	"time"
@@ -50,6 +51,19 @@ func (s *AuthService) generateToken(userID uint) (string, error) {
 }
 
 func (s *AuthService) Register(ctx context.Context, username, email, password string) error {
+
+	if err := validation.ValidateEmail(email); err != nil {
+		return err
+	}
+
+	existedUser, err := s.userRepo.FindByEmail(ctx, email)
+	if err != nil {
+		return err
+	}
+
+	if existedUser != nil {
+		return errors.New("user email already exists")
+	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {

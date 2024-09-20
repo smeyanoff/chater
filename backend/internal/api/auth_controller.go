@@ -27,6 +27,7 @@ func NewAuthController(authService *service.AuthService) *AuthController {
 // @Success 201 {object} successResponse
 // @Failure 400 {object} errorResponse
 // @Failure 500 {object} errorResponse
+// @Failure 409 {object} errorResponse
 // @Router /auth/register [post]
 func (h *AuthController) Register(c *gin.Context) {
 	var req registerRequest
@@ -37,8 +38,13 @@ func (h *AuthController) Register(c *gin.Context) {
 
 	err := h.authService.Register(c.Request.Context(), req.Username, req.Email, req.Password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, errorResponse{Error: "Failed to register user"})
-		return
+		if err.Error() == "user email already exists" {
+			c.JSON(http.StatusConflict, errorResponse{Error: "User email already exists"})
+			return
+		} else {
+			c.JSON(http.StatusInternalServerError, errorResponse{Error: "Failed to register user"})
+			return
+		}
 	}
 
 	c.JSON(http.StatusCreated, successResponse{Message: "User registered successfully"})
