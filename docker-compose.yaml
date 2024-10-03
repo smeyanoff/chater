@@ -3,6 +3,8 @@ version: '3.8'
 services:
   db:
     image: postgres:13
+    env_file:
+      - .env
     environment:
       - POSTGRES_USER=${CHATER_DB_USER}
       - POSTGRES_PASSWORD=${CHATER_DB_PWD}
@@ -19,7 +21,7 @@ services:
   backend:
     build: ./backend
     env_file:
-      - .env.local
+      - .env
     ports:
       - "${CHATER_APP_PORT}:${CHATER_APP_PORT}"
     depends_on:

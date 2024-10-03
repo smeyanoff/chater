@@ -1,23 +1,23 @@
 <template>
-    <form @submit.prevent="submitRegister">
-        <div>
-            <label for="login">Login</label>
-            <input v-model="registerData.userName" id="login" type="login" required />
+    <form @submit.prevent="submitRegister" class="auth-form">
+        <div class="form-group">
+            <label for="login">Login:</label>
+            <input v-model="registerData.userName" id="login" type="login" required/>
         </div>
-        <div>
+        <div class="form-group">
             <label for="email">Email:</label>
-            <input v-model="registerData.email" id="email" type="email" required />
+            <input v-model="registerData.email" id="email" type="email" required/>
         </div>
-        <div>
+        <div class="form-group">
             <label for="password">Password:</label>
-            <input v-model="registerData.password" id="password" type="password" required />
+            <input v-model="registerData.password" id="password" type="password" required/>
         </div>
-        <div>
+        <div class="form-group">
             <label for="confirmPassword">Confirm Password:</label>
-            <input v-model="registerData.confirmPassword" id="confirmPassword" type="password" required />
+            <input v-model="registerData.confirmPassword" id="confirmPassword" type="password" required/>
         </div>
-        <button type="submit" :disabled="loading">Register</button>
-        <p v-if="error">{{ error }}</p>
+        <button type="submit" :disabled="loading" class="form-button">Register</button>
+        <p v-if="error" class="error-message">{{ error }}</p>
     </form>
   </template>
 
@@ -26,6 +26,7 @@ import { defineComponent, reactive, ref } from 'vue'
 import { register, RegisterRequest } from '@/api/auth'
 
 export default defineComponent({
+  name: 'RegisterForm',
   setup () {
     const registerData = reactive<RegisterRequest>({
       userName: '',

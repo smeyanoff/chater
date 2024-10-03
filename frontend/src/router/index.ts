@@ -1,18 +1,12 @@
 // src/router/index.ts
 import { createRouter, createWebHistory } from 'vue-router'
-import submitLogin from '@/components/Login.vue'
-import submitRegister from '@/components/Registration.vue'
+import AuthPage from '@/views/AuthPage.vue'
 
 const routes = [
   {
-    path: '/login',
-    name: 'Login',
-    component: submitLogin
-  },
-  {
-    path: '/register',
-    name: 'Register',
-    component: submitRegister
+    path: '/auth',
+    name: 'Auth',
+    component: AuthPage
   }
 ]
 
@@ -25,7 +19,7 @@ router.beforeEach((to, from, next) => {
   const isAuthenticated = !!localStorage.getItem('authToken') // Проверяем наличие токена
 
   if (to.meta.requiresAuth && !isAuthenticated) {
-    next('/login') // Перенаправляем на страницу логина, если не авторизован
+    next('/auth') // Перенаправляем на страницу логина, если не авторизован
   } else {
     next() // Если аутентификация не требуется или пользователь авторизован
   }

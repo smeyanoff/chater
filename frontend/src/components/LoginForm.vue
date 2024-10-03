@@ -1,15 +1,15 @@
 <template>
-    <form @submit.prevent="submitLogin">
-      <div>
+    <form @submit.prevent="submitLogin" class="auth-form">
+      <div class="form-group">
         <label for="login">Login:</label>
-        <input v-model="loginData.username" id="login" type="login" required />
+        <input v-model="loginData.username" id="login" type="text" required/>
       </div>
-      <div>
+      <div class="form-group">
         <label for="password">Password:</label>
-        <input v-model="loginData.password" id="password" type="password" required />
+        <input v-model="loginData.password" id="password" type="password" required/>
       </div>
-      <button type="submit" :disabled="loading">Login</button>
-      <p v-if="error">{{ error }}</p>
+      <button type="submit" :disabled="loading" class="form-button">Login</button>
+      <p v-if="error" class="error-message">{{ error }}</p>
     </form>
   </template>
 
@@ -18,6 +18,7 @@ import { defineComponent, reactive, ref } from 'vue'
 import { login, LoginRequest } from '@/api/auth'
 
 export default defineComponent({
+  name: 'LoginForm',
   setup () {
     const loginData = reactive<LoginRequest>({
       username: '',
