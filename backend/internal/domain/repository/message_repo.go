@@ -6,6 +6,6 @@ import (
 )
 
 type MessageRepository interface {
-	CreateMessage(ctx context.Context, message *models.Message) error
+	CreateMessage(ctx context.Context, message *models.Message) (*models.Message, error)
 	GetMessagesByChatID(ctx context.Context, chatID uint) ([]*models.Message, error)
 }

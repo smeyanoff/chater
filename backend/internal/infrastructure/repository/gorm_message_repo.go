@@ -17,13 +17,23 @@ func NewGormMessageRepository(db *gorm.DB) repository.MessageRepository {
 }
 
 // Создание нового сообщения
-func (r *gormMessageRepository) CreateMessage(ctx context.Context, message *entities.Message) error {
-	return r.db.Create(message).Error
+func (r *gormMessageRepository) CreateMessage(ctx context.Context, message *entities.Message) (*entities.Message, error) {
+	// Создание сообщения
+	if err := r.db.WithContext(ctx).Create(message).Error; err != nil {
+		return nil, err
+	}
+
+	// Предзагрузка связанных данных (например, Sender)
+	if err := r.db.WithContext(ctx).Preload("Sender").First(message, message.ID).Error; err != nil {
+		return nil, err
+	}
+
+	return message, nil
 }
 
 // Получение всех сообщений по ID чата
 func (r *gormMessageRepository) GetMessagesByChatID(ctx context.Context, chatID uint) ([]*entities.Message, error) {
 	var messages []*entities.Message
-	err := r.db.Where("chat_id = ?", chatID).Order("created_at asc").Find(&messages).Error
+	err := r.db.WithContext(ctx).Preload("Sender").Where("chat_id = ?", chatID).Order("created_at asc").Find(&messages).Error
 	return messages, err
 }

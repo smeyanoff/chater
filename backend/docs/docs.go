@@ -157,6 +157,55 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Создаёт новый чат с указанным именем и возвращает его данные",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chats"
+                ],
+                "summary": "Создание нового чата",
+                "parameters": [
+                    {
+                        "description": "Данные для создания чата",
+                        "name": "chat",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.createChatRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Информация о созданном чате",
+                        "schema": {
+                            "$ref": "#/definitions/api.chatResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный запрос",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка на сервере",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    }
+                }
             }
         },
         "/chats/{chat_id}/messages": {
@@ -315,10 +364,23 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "chats": {
+                    "description": "Чаты",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/api.chatResponse"
                     }
+                }
+            }
+        },
+        "api.createChatRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "description": "Название чата",
+                    "type": "string"
                 }
             }
         },
@@ -376,6 +438,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "messages": {
+                    "description": "Сообщения чата",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/api.messageResponse"
@@ -408,13 +471,9 @@ const docTemplate = `{
         "api.sendMessageRequest": {
             "type": "object",
             "required": [
-                "chat_id",
                 "content"
             ],
             "properties": {
-                "chat_id": {
-                    "type": "string"
-                },
                 "content": {
                     "type": "string"
                 }

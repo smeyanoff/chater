@@ -21,9 +21,10 @@ func (s *MessageService) SendMessage(ctx context.Context, chatID uint, senderID 
 		ChatID:   chatID,
 		SenderID: senderID,
 	}
+	message, err := s.messageRepo.CreateMessage(ctx, message)
 
 	// Создаем сообщение в базе данных
-	if err := s.messageRepo.CreateMessage(ctx, message); err != nil {
+	if err != nil {
 		return nil, err
 	}
 

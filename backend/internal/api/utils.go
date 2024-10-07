@@ -24,7 +24,7 @@ func mapMessages(messages []*entities.Message) []messageResponse {
 		result = append(result, messageResponse{
 			ID:        message.ID,
 			SenderID:  message.SenderID,
-			Sender:    message.Sender.Username, // Или можно получить это через отношения
+			Sender:    message.Sender.Username,
 			Content:   message.Content,
 			CreatedAt: message.CreatedAt.Format(time.RFC3339),
 		})

@@ -1,11 +1,11 @@
 package api
 
 type messagesResponse struct {
-	Messages []messageResponse
+	Messages []messageResponse `json:"messages"` // Сообщения чата
 }
 
 type chatsResponse struct {
-	Chats []chatResponse
+	Chats []chatResponse `json:"chats"` // Чаты
 }
 
 type chatResponse struct {

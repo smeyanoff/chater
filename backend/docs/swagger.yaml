@@ -37,9 +37,18 @@ definitions:
   api.chatsResponse:
     properties:
       chats:
+        description: Чаты
         items:
           $ref: '#/definitions/api.chatResponse'
         type: array
+    type: object
+  api.createChatRequest:
+    properties:
+      name:
+        description: Название чата
+        type: string
+    required:
+    - name
     type: object
   api.errorResponse:
     properties:
@@ -79,6 +88,7 @@ definitions:
   api.messagesResponse:
     properties:
       messages:
+        description: Сообщения чата
         items:
           $ref: '#/definitions/api.messageResponse'
         type: array
@@ -101,12 +111,9 @@ definitions:
     type: object
   api.sendMessageRequest:
     properties:
-      chat_id:
-        type: string
       content:
         type: string
     required:
-    - chat_id
     - content
     type: object
   api.successResponse:
@@ -219,6 +226,37 @@ paths:
       security:
       - BearerAuth: []
       summary: Get all chats for the authenticated user
+      tags:
+      - chats
+    post:
+      consumes:
+      - application/json
+      description: Создаёт новый чат с указанным именем и возвращает его данные
+      parameters:
+      - description: Данные для создания чата
+        in: body
+        name: chat
+        required: true
+        schema:
+          $ref: '#/definitions/api.createChatRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Информация о созданном чате
+          schema:
+            $ref: '#/definitions/api.chatResponse'
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+        "500":
+          description: Ошибка на сервере
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: Создание нового чата
       tags:
       - chats
   /chats/{chat_id}/messages:

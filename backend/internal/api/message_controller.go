@@ -6,8 +6,6 @@ import (
 	"strconv"
 	"time"
 
-	_ "chater/internal/domain/entity"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,7 +39,7 @@ func (mc *MessageController) SendMessage(ctx *gin.Context) {
 	}
 
 	userID := ctx.MustGet("user_id").(uint) // Получаем ID отправителя (например, из JWT)
-	chatID := request.ChatID
+	chatID := ctx.Param("chat_id")
 
 	// Преобразование строки chatID в uint
 	chatIDUint, err := strconv.ParseUint(chatID, 10, 32)
@@ -59,7 +57,7 @@ func (mc *MessageController) SendMessage(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, messageResponse{
 		ID:        message.ID,
 		SenderID:  message.SenderID,
-		Sender:    message.Sender.Username, // Или можно получить это через отношения
+		Sender:    message.Sender.Username,
 		Content:   message.Content,
 		CreatedAt: message.CreatedAt.Format(time.RFC3339),
 	})

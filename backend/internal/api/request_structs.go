@@ -14,7 +14,6 @@ type loginRequest struct {
 }
 
 type sendMessageRequest struct {
-	ChatID  string `json:"chat_id" binding:"required"`
 	Content string `json:"content" binding:"required"`
 }
 
