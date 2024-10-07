@@ -41,7 +41,7 @@ func (c *ChatController) GetChatsForUser(ctx *gin.Context) {
 	// Вызываем сервис для получения чатов
 	chats, err := c.chatService.GetUserChats(ctx, userID.(uint))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: "Failed to fetch chats"})
+		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
 		return
 	}
 
@@ -69,29 +69,37 @@ func mapChatsToResponse(chats []*entities.Chat) []chatResponse {
 	return response
 }
 
-// Преобразование участников чатов в структуру ответа
-func mapMembers(members []*entities.User) []chatMember {
-	var result []chatMember
-	for _, member := range members {
-		result = append(result, chatMember{
-			ID:       member.ID,
-			Username: member.Username,
-		})
+// CreateChat godoc
+// @Summary Создание нового чата
+// @Description Создаёт новый чат с указанным именем и возвращает его данные
+// @Tags chats
+// @Accept  json
+// @Produce  json
+// @Param   chat body createChatRequest true "Данные для создания чата"
+// @Success 200 {object} chatResponse "Информация о созданном чате"
+// @Failure 400 {object} errorResponse "Неверный запрос"
+// @Failure 500 {object} errorResponse "Ошибка на сервере"
+// @Security BearerAuth
+// @Router /chats [post]
+func (cc *ChatController) CreateChat(ctx *gin.Context) {
+	var request createChatRequest
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse{Error: "Invalid request"})
+		return
 	}
-	return result
-}
 
-// Преобразование сообщений чатов в структуру ответа
-func mapMessages(messages []*entities.Message) []messageDetail {
-	var result []messageDetail
-	for _, message := range messages {
-		result = append(result, messageDetail{
-			ID:        message.ID,
-			SenderID:  message.SenderID,
-			Sender:    message.Sender.Username, // Или можно получить это через отношения
-			Content:   message.Content,
-			CreatedAt: message.CreatedAt.Format(time.RFC3339),
-		})
+	ownerID := ctx.MustGet("user_id").(uint) // Получаем ID пользователя (например, из JWT)
+
+	chat, err := cc.chatService.CreateChat(ctx, request.Name, ownerID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: "Failed to create chat"})
+		return
 	}
-	return result
+
+	ctx.JSON(http.StatusOK, chatResponse{
+		ID:        chat.ID,
+		Name:      chat.Name.String(),
+		CreatedAt: chat.CreatedAt.String(),
+		UpdatedAt: chat.UpdatedAt.String(),
+	})
 }

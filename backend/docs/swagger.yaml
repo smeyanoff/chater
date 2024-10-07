@@ -1,6 +1,6 @@
 basePath: /
 definitions:
-  api.chatMember:
+  api.chatMemberResponse:
     properties:
       id:
         description: Идентификатор пользователя
@@ -20,12 +20,12 @@ definitions:
       members:
         description: Список участников чата
         items:
-          $ref: '#/definitions/api.chatMember'
+          $ref: '#/definitions/api.chatMemberResponse'
         type: array
       messages:
         description: Последние сообщения чата
         items:
-          $ref: '#/definitions/api.messageDetail'
+          $ref: '#/definitions/api.messageResponse'
         type: array
       name:
         description: Название чата
@@ -49,14 +49,16 @@ definitions:
   api.loginRequest:
     properties:
       password:
+        description: Пароль пользователя
         type: string
       username:
+        description: Имя пользователя
         type: string
     required:
     - password
     - username
     type: object
-  api.messageDetail:
+  api.messageResponse:
     properties:
       content:
         description: Содержание сообщения
@@ -74,18 +76,38 @@ definitions:
         description: Идентификатор отправителя
         type: integer
     type: object
+  api.messagesResponse:
+    properties:
+      messages:
+        items:
+          $ref: '#/definitions/api.messageResponse'
+        type: array
+    type: object
   api.registerRequest:
     properties:
       email:
+        description: Емейл пользователя
         type: string
       password:
+        description: Пароль пользователя
         type: string
       username:
+        description: Имя пользователя
         type: string
     required:
     - email
     - password
     - username
+    type: object
+  api.sendMessageRequest:
+    properties:
+      chat_id:
+        type: string
+      content:
+        type: string
+    required:
+    - chat_id
+    - content
     type: object
   api.successResponse:
     properties:
@@ -164,6 +186,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/api.errorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/api.errorResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -195,6 +221,72 @@ paths:
       summary: Get all chats for the authenticated user
       tags:
       - chats
+  /chats/{chat_id}/messages:
+    get:
+      description: Возвращает список всех сообщений в чате по его ID
+      parameters:
+      - description: ID чата
+        in: path
+        name: chat_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список сообщений
+          schema:
+            $ref: '#/definitions/api.messagesResponse'
+        "400":
+          description: Ошибка в запросе
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+        "500":
+          description: Ошибка на стороне сервера
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: Получение сообщений чата
+      tags:
+      - messages
+    post:
+      consumes:
+      - application/json
+      description: Позволяет отправить сообщение в чат, указав идентификатор чата
+        и текст сообщения
+      parameters:
+      - description: ID чата
+        in: path
+        name: chat_id
+        required: true
+        type: integer
+      - description: Данные для отправки сообщения
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/api.sendMessageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешное отправленное сообщение
+          schema:
+            $ref: '#/definitions/api.messageResponse'
+        "400":
+          description: Ошибка в запросе
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+        "500":
+          description: Ошибка на стороне сервера
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: Отправка сообщения в чат
+      tags:
+      - messages
 securityDefinitions:
   BearerAuth:
     in: header

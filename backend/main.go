@@ -16,6 +16,8 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	_ "chater/docs"
+	_ "chater/internal/domain/entity"
+	_ "chater/internal/domain/valueobject"
 
 	"log"
 )
@@ -87,7 +89,17 @@ func main() {
 	chatService := service.NewChatService(chatRepo)
 	chatController := api.NewChatController(chatService)
 
-	r.GET("chats/", chatController.GetChatsForUser)
+	r.GET("/chats", chatController.GetChatsForUser)
+	r.POST("/chats", chatController.CreateChat)
+
+	// messages
+	messageRepo := repository.NewGormMessageRepository(database)
+	messageService := service.NewMessageService(messageRepo)
+	messageController := api.NewMessageController(messageService)
+
+	// Маршруты для работы с сообщениями
+	r.POST("/chats/:chat_id/messages", messageController.SendMessage)
+	r.GET("/chats/:chat_id/messages", messageController.GetMessages)
 
 	// Запуск HTTP-сервера
 	log.Printf("Server is running on port %s", cfg.App.Port)

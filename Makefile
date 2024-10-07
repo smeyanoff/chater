@@ -1,6 +1,6 @@
 
-setup: docker-compose.yaml
-	docker-compose up --build
+.swag:
+	cd ./backend && swag init
 
-run_backend:
-	go run ./backend/main.go
+setup: docker-compose.yaml .swag
+	docker-compose up --build

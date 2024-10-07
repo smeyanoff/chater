@@ -1,24 +1,28 @@
 package api
 
+type messagesResponse struct {
+	Messages []messageResponse
+}
+
 type chatsResponse struct {
 	Chats []chatResponse
 }
 
 type chatResponse struct {
-	ID        uint            `json:"id"`         // Идентификатор чата
-	Name      string          `json:"name"`       // Название чата
-	CreatedAt string          `json:"created_at"` // Время создания чата
-	UpdatedAt string          `json:"updated_at"` // Время последнего обновления чата
-	Members   []chatMember    `json:"members"`    // Список участников чата
-	Messages  []messageDetail `json:"messages"`   // Последние сообщения чата
+	ID        uint                 `json:"id"`         // Идентификатор чата
+	Name      string               `json:"name"`       // Название чата
+	CreatedAt string               `json:"created_at"` // Время создания чата
+	UpdatedAt string               `json:"updated_at"` // Время последнего обновления чата
+	Members   []chatMemberResponse `json:"members"`    // Список участников чата
+	Messages  []messageResponse    `json:"messages"`   // Последние сообщения чата
 }
 
-type chatMember struct {
+type chatMemberResponse struct {
 	ID       uint   `json:"id"`       // Идентификатор пользователя
 	Username string `json:"username"` // Имя пользователя
 }
 
-type messageDetail struct {
+type messageResponse struct {
 	ID        uint   `json:"id"`         // Идентификатор сообщения
 	SenderID  uint   `json:"sender_id"`  // Идентификатор отправителя
 	Sender    string `json:"sender"`     // Имя отправителя

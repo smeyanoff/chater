@@ -15,14 +15,15 @@ func NewChatService(chatRepo repo.ChatRepository) *ChatService {
 	return &ChatService{chatRepo: chatRepo}
 }
 
-func (cc *ChatService) CreateChat(ctx context.Context, name string) (*models.Chat, error) {
+func (cc *ChatService) CreateChat(ctx context.Context, name string, ownerID uint) (*models.Chat, error) {
 	chatName, err := valueobject.NewChatName(name)
 	if err != nil {
 		return nil, err
 	}
 
 	newChat := &models.Chat{
-		Name: chatName,
+		Name:    chatName,
+		OwnerID: ownerID,
 	}
 	if err := cc.chatRepo.Save(ctx, newChat); err != nil {
 		return nil, err

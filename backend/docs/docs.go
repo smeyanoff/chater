@@ -107,6 +107,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/api.errorResponse"
                         }
                     },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -152,10 +158,112 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/chats/{chat_id}/messages": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает список всех сообщений в чате по его ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "Получение сообщений чата",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID чата",
+                        "name": "chat_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Список сообщений",
+                        "schema": {
+                            "$ref": "#/definitions/api.messagesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Ошибка в запросе",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка на стороне сервера",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Позволяет отправить сообщение в чат, указав идентификатор чата и текст сообщения",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "Отправка сообщения в чат",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID чата",
+                        "name": "chat_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Данные для отправки сообщения",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.sendMessageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешное отправленное сообщение",
+                        "schema": {
+                            "$ref": "#/definitions/api.messageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Ошибка в запросе",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка на стороне сервера",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
-        "api.chatMember": {
+        "api.chatMemberResponse": {
             "type": "object",
             "properties": {
                 "id": {
@@ -183,14 +291,14 @@ const docTemplate = `{
                     "description": "Список участников чата",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/api.chatMember"
+                        "$ref": "#/definitions/api.chatMemberResponse"
                     }
                 },
                 "messages": {
                     "description": "Последние сообщения чата",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/api.messageDetail"
+                        "$ref": "#/definitions/api.messageResponse"
                     }
                 },
                 "name": {
@@ -230,14 +338,16 @@ const docTemplate = `{
             ],
             "properties": {
                 "password": {
+                    "description": "Пароль пользователя",
                     "type": "string"
                 },
                 "username": {
+                    "description": "Имя пользователя",
                     "type": "string"
                 }
             }
         },
-        "api.messageDetail": {
+        "api.messageResponse": {
             "type": "object",
             "properties": {
                 "content": {
@@ -262,6 +372,17 @@ const docTemplate = `{
                 }
             }
         },
+        "api.messagesResponse": {
+            "type": "object",
+            "properties": {
+                "messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.messageResponse"
+                    }
+                }
+            }
+        },
         "api.registerRequest": {
             "type": "object",
             "required": [
@@ -271,12 +392,30 @@ const docTemplate = `{
             ],
             "properties": {
                 "email": {
+                    "description": "Емейл пользователя",
                     "type": "string"
                 },
                 "password": {
+                    "description": "Пароль пользователя",
                     "type": "string"
                 },
                 "username": {
+                    "description": "Имя пользователя",
+                    "type": "string"
+                }
+            }
+        },
+        "api.sendMessageRequest": {
+            "type": "object",
+            "required": [
+                "chat_id",
+                "content"
+            ],
+            "properties": {
+                "chat_id": {
+                    "type": "string"
+                },
+                "content": {
                     "type": "string"
                 }
             }

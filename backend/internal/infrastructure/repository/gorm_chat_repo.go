@@ -3,6 +3,7 @@ package repository
 import (
 	models "chater/internal/domain/entity"
 	"chater/internal/domain/repository"
+	_ "chater/internal/domain/valueobject"
 	"context"
 
 	"gorm.io/gorm"
@@ -36,10 +37,13 @@ func (r *gormChatRepository) FindAllByUserIdWithLastMessage(ctx context.Context,
 	var chats []*models.Chat
 
 	// Загрузить чаты пользователя с последним сообщением для каждого чата
-	err := r.db.Preload("Messages", func(db *gorm.DB) *gorm.DB {
-		return db.Order("created_at DESC").Limit(1) // Загрузить только одно последнее сообщение
-	}).Joins("JOIN user_chats ON user_chats.chat_id = chats.id").
-		Where("user_chats.user_id = ?", userId).
+	err := r.db.
+		Joins("JOIN chat_users ON chat_users.chat_id = chats.id").
+		Where("chat_users.user_id = ?", userId).
+		Preload("Members"). // Загрузка участников чатов
+		Preload("Messages", func(db *gorm.DB) *gorm.DB {
+			return db.Order("created_at DESC").Limit(1) // Загрузка только последнего сообщения
+		}).
 		Find(&chats).Error
 
 	if err != nil {

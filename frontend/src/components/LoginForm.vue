@@ -33,10 +33,9 @@ export default defineComponent({
 
       try {
         const response = await login(loginData)
-        const token = response.data.token
+        const token = response.token
         localStorage.setItem('authToken', token)
-
-        console.log('Login successful:', response.data)
+        console.log('Login successful:', response)
       } catch (err) {
         error.value = 'Login failed. Please try again.'
         console.error('Login error:', err)

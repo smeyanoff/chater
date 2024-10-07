@@ -6,6 +6,7 @@ import (
 	models "chater/internal/domain/entity"
 	"chater/internal/domain/repository"
 	"chater/internal/domain/validation"
+	_ "chater/internal/domain/valueobject"
 	"context"
 	"errors"
 	"time"

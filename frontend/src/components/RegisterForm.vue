@@ -48,7 +48,7 @@ export default defineComponent({
 
       try {
         const response = await register(registerData)
-        console.log('Registration successful:', response.data)
+        console.log('Registration successful:', response)
       } catch (err) {
         error.value = 'Registration failed. Please try again.'
         console.error('Registration error:', err)
