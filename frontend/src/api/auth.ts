@@ -24,12 +24,12 @@ export interface RegisterResponse {
 
 // Функция для аутентификации
 export const login = async (data: LoginRequest): Promise<LoginResponse> => {
-  const response = await apiClient.post<LoginResponse>('/auth/login', data);
+  const response = await apiClient.post<LoginResponse>('/auth/login', data)
   return response.data
-};
+}
 
 // Функция для регистрации
 export const register = async (data: RegisterRequest): Promise<RegisterResponse> => {
-  const response = await apiClient.post<RegisterResponse>('/auth/register', data);
+  const response = await apiClient.post<RegisterResponse>('/auth/register', data)
   return response.data
-};
+}

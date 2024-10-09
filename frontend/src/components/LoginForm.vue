@@ -16,6 +16,7 @@
 <script lang="ts">
 import { defineComponent, reactive, ref } from 'vue'
 import { login, LoginRequest } from '@/api/auth'
+import router from '@/router'
 
 export default defineComponent({
   name: 'LoginForm',
@@ -36,6 +37,7 @@ export default defineComponent({
         const token = response.token
         localStorage.setItem('authToken', token)
         console.log('Login successful:', response)
+        router.push({ name: 'chats' })
       } catch (err) {
         error.value = 'Login failed. Please try again.'
         console.error('Login error:', err)

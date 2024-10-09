@@ -1,12 +1,23 @@
 // src/router/index.ts
 import { createRouter, createWebHistory } from 'vue-router'
 import AuthPage from '@/views/AuthPage.vue'
+import ChatView from '@/views/ChatView.vue'
 
 const routes = [
   {
+    path: '/', // Корневой маршрут
+    redirect: '/auth' // Редирект на страницу логина
+  },
+  {
     path: '/auth',
-    name: 'Auth',
+    name: 'auth',
     component: AuthPage
+  },
+  {
+    path: '/chats',
+    name: 'chats', // Имя маршрута для списка чатов
+    component: ChatView,
+    meta: { requiresAuth: true }
   }
 ]
 
