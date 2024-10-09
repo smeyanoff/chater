@@ -11,6 +11,7 @@ export interface ChatMessage {
   createdAt: string;
   sender: string;
   senderId: number;
+  isCurrent: boolean;
 }
 
 // Интерфейс для чата

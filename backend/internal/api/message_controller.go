@@ -4,7 +4,6 @@ import (
 	"chater/internal/service"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -54,13 +53,7 @@ func (mc *MessageController) SendMessage(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, messageResponse{
-		ID:        message.ID,
-		SenderID:  message.SenderID,
-		Sender:    message.Sender.Username,
-		Content:   message.Content,
-		CreatedAt: message.CreatedAt.Format(time.RFC3339),
-	})
+	ctx.JSON(http.StatusOK, mapMessage(message, userID))
 }
 
 // GetMessages godoc
@@ -76,6 +69,7 @@ func (mc *MessageController) SendMessage(ctx *gin.Context) {
 // @Router /chats/{chat_id}/messages [get]
 func (mc *MessageController) GetMessages(ctx *gin.Context) {
 	chatID := ctx.Param("chat_id")
+	userID := ctx.MustGet("user_id").(uint)
 
 	// Преобразование строки chatID в uint
 	chatIDUint, err := strconv.ParseUint(chatID, 10, 32)
@@ -90,5 +84,5 @@ func (mc *MessageController) GetMessages(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, messagesResponse{Messages: mapMessages(messages)})
+	ctx.JSON(http.StatusOK, messagesResponse{Messages: mapMessages(messages, userID)})
 }

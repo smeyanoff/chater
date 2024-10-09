@@ -424,6 +424,10 @@ const docTemplate = `{
                     "description": "Идентификатор сообщения",
                     "type": "integer"
                 },
+                "isCurrent": {
+                    "description": "Сообщение отправлено текущим пользователем",
+                    "type": "boolean"
+                },
                 "sender": {
                     "description": "Имя отправителя",
                     "type": "string"

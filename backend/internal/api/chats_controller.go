@@ -1,10 +1,8 @@
 package api
 
 import (
-	entities "chater/internal/domain/entity"
 	"chater/internal/service"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -46,27 +44,10 @@ func (c *ChatController) GetChatsForUser(ctx *gin.Context) {
 	}
 
 	// Преобразуем данные чатов в response структуру
-	response := mapChatsToResponse(chats)
+	response := mapChats(chats, userID.(uint))
 
 	// Отправляем ответ
 	ctx.JSON(http.StatusOK, chatsResponse{Chats: response})
-}
-
-// Преобразование сущностей чатов в структуру ответа
-func mapChatsToResponse(chats []*entities.Chat) []chatResponse {
-	var response []chatResponse
-	for _, chat := range chats {
-		chatResponse := chatResponse{
-			ID:        chat.ID,
-			Name:      chat.Name.String(),
-			CreatedAt: chat.CreatedAt.Format(time.RFC3339),
-			UpdatedAt: chat.UpdatedAt.Format(time.RFC3339),
-			Members:   mapMembers(chat.Members),
-			Messages:  mapMessages(chat.Messages),
-		}
-		response = append(response, chatResponse)
-	}
-	return response
 }
 
 // CreateChat godoc
@@ -96,10 +77,5 @@ func (cc *ChatController) CreateChat(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, chatResponse{
-		ID:        chat.ID,
-		Name:      chat.Name.String(),
-		CreatedAt: chat.CreatedAt.String(),
-		UpdatedAt: chat.UpdatedAt.String(),
-	})
+	ctx.JSON(http.StatusOK, mapChat(chat, ownerID))
 }

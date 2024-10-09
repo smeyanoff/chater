@@ -6,6 +6,7 @@
         <div
           v-for="message in messages"
           :key="message.id"
+          :class="{'message-outgoing': message.isCurrent, 'message-incoming': !message.isCurrent}"
         >
           <p>{{ message.content }}</p>
         </div>
@@ -17,6 +18,7 @@
             placeholder="Написать сообщение..."
             @keyup.enter="sendMessage"
             class="input-field"
+
         />
       </footer>
     </section>
