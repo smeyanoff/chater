@@ -26,7 +26,7 @@ type messageResponse struct {
 	ID        uint   `json:"id"`         // Идентификатор сообщения
 	SenderID  uint   `json:"sender_id"`  // Идентификатор отправителя
 	Sender    string `json:"sender"`     // Имя отправителя
-	IsCurrent bool   `json:"is_current`  // Сообщение отправлено текущим пользователем
+	IsCurrent bool   `json:"is_current"` // Сообщение отправлено текущим пользователем
 	Content   string `json:"content"`    // Содержание сообщения
 	CreatedAt string `json:"created_at"` // Время отправки сообщения
 }

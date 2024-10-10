@@ -53,7 +53,6 @@ export default defineComponent({
   }
   .chat-item {
     padding: 10px;
-    cursor: pointer;
   }
   .active {
     background-color: #e6e6e6;

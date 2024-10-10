@@ -86,7 +86,7 @@ func main() {
 
 	// chats
 	chatRepo := repository.NewGormChatRepository(database)
-	chatService := service.NewChatService(chatRepo)
+	chatService := service.NewChatService(chatRepo, userRepo)
 	chatController := api.NewChatController(chatService)
 
 	r.GET("/chats", chatController.GetChatsForUser)

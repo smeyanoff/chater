@@ -37,12 +37,11 @@ func (r *gormChatRepository) FindAllByUserIdWithLastMessage(ctx context.Context,
 	var chats []*models.Chat
 
 	// Загрузить чаты пользователя с последним сообщением для каждого чата
-	err := r.db.
-		WithContext(ctx).
-		Preload("Messages", func(db *gorm.DB) *gorm.DB {
-			return db.Order("created_at DESC").Limit(1).Preload("Sender")
-		}).
+	err := r.db.WithContext(ctx).
 		Preload("Members").
+		Preload("Messages", func(db *gorm.DB) *gorm.DB {
+			return db.Joins("JOIN (SELECT chat_id, MAX(created_at) AS max_created_at FROM messages GROUP BY chat_id) last_messages ON messages.chat_id = last_messages.chat_id AND messages.created_at = last_messages.max_created_at")
+		}).Preload("Messages.Sender").
 		Find(&chats).Error
 
 	if err != nil {

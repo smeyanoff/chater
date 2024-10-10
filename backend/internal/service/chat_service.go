@@ -1,6 +1,7 @@
 package service
 
 import (
+	entities "chater/internal/domain/entity"
 	models "chater/internal/domain/entity"
 	repo "chater/internal/domain/repository"
 	"chater/internal/domain/valueobject"
@@ -9,10 +10,14 @@ import (
 
 type ChatService struct {
 	chatRepo repo.ChatRepository
+	userRepo repo.UserRepository
 }
 
-func NewChatService(chatRepo repo.ChatRepository) *ChatService {
-	return &ChatService{chatRepo: chatRepo}
+func NewChatService(chatRepo repo.ChatRepository, userRepo repo.UserRepository) *ChatService {
+	return &ChatService{
+		chatRepo: chatRepo,
+		userRepo: userRepo,
+	}
 }
 
 func (cc *ChatService) CreateChat(ctx context.Context, name string, ownerID uint) (*models.Chat, error) {
@@ -21,9 +26,15 @@ func (cc *ChatService) CreateChat(ctx context.Context, name string, ownerID uint
 		return nil, err
 	}
 
+	owner, err := cc.userRepo.FindByID(ctx, ownerID)
+	if err != nil {
+		return nil, err
+	}
+
 	newChat := &models.Chat{
 		Name:    chatName,
 		OwnerID: ownerID,
+		Members: []*entities.User{owner},
 	}
 	if err := cc.chatRepo.Save(ctx, newChat); err != nil {
 		return nil, err

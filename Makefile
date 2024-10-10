@@ -3,4 +3,4 @@
 	cd ./backend && swag init
 
 setup: docker-compose.yaml .swag
-	docker-compose up --build
+	docker-compose up --build -d
