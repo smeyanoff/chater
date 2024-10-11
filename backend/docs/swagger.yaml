@@ -11,7 +11,7 @@ definitions:
     type: object
   api.chatResponse:
     properties:
-      created_at:
+      createdAt:
         description: Время создания чата
         type: string
       id:
@@ -30,7 +30,7 @@ definitions:
       name:
         description: Название чата
         type: string
-      updated_at:
+      updatedAt:
         description: Время последнего обновления чата
         type: string
     type: object
@@ -72,19 +72,19 @@ definitions:
       content:
         description: Содержание сообщения
         type: string
-      created_at:
+      createdAt:
         description: Время отправки сообщения
         type: string
       id:
         description: Идентификатор сообщения
         type: integer
-      is_current:
+      isCurrent:
         description: Сообщение отправлено текущим пользователем
         type: boolean
       sender:
         description: Имя отправителя
         type: string
-      sender_id:
+      senderID:
         description: Идентификатор отправителя
         type: integer
     type: object
@@ -115,6 +115,7 @@ definitions:
   api.sendMessageRequest:
     properties:
       content:
+        description: Текст сообщения
         type: string
     required:
     - content

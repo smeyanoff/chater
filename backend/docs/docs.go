@@ -328,7 +328,7 @@ const docTemplate = `{
         "api.chatResponse": {
             "type": "object",
             "properties": {
-                "created_at": {
+                "createdAt": {
                     "description": "Время создания чата",
                     "type": "string"
                 },
@@ -354,7 +354,7 @@ const docTemplate = `{
                     "description": "Название чата",
                     "type": "string"
                 },
-                "updated_at": {
+                "updatedAt": {
                     "description": "Время последнего обновления чата",
                     "type": "string"
                 }
@@ -416,7 +416,7 @@ const docTemplate = `{
                     "description": "Содержание сообщения",
                     "type": "string"
                 },
-                "created_at": {
+                "createdAt": {
                     "description": "Время отправки сообщения",
                     "type": "string"
                 },
@@ -424,7 +424,7 @@ const docTemplate = `{
                     "description": "Идентификатор сообщения",
                     "type": "integer"
                 },
-                "is_current": {
+                "isCurrent": {
                     "description": "Сообщение отправлено текущим пользователем",
                     "type": "boolean"
                 },
@@ -432,7 +432,7 @@ const docTemplate = `{
                     "description": "Имя отправителя",
                     "type": "string"
                 },
-                "sender_id": {
+                "senderID": {
                     "description": "Идентификатор отправителя",
                     "type": "integer"
                 }
@@ -479,6 +479,7 @@ const docTemplate = `{
             ],
             "properties": {
                 "content": {
+                    "description": "Текст сообщения",
                     "type": "string"
                 }
             }

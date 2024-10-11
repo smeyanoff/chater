@@ -10,7 +10,7 @@ export interface ChatMessage {
   content: string;
   createdAt: string;
   sender: string;
-  senderId: number;
+  senderID: number;
   isCurrent: boolean;
 }
 

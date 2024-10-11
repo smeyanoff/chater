@@ -1,34 +1,39 @@
 <template>
-    <section v-if="chat" class="chat-window">
-      <header class="chat-header">{{ chat.name }}</header>
-      <div class="messages-container">
-        <!-- Проходим по сообщениям -->
-        <div
-          v-for="message in messages"
-          :key="message.id"
-          :class="{'message-outgoing': message.isCurrent, 'message-incoming': !message.isCurrent}"
-        >
+  <section v-if="chat" class="chat-window">
+    <header class="chat-header">{{ chat.name }}</header>
+    <div class="messages-container" ref="messagesContainer"> <!-- ref на контейнер сообщений -->
+      <!-- Проходим по сообщениям -->
+      <div
+        v-for="(message, index) in messages"
+        :key="message.id"
+        :class="{'message-outgoing': message.isCurrent, 'message-incoming': !message.isCurrent}"
+      >
+        <div class="message-meta">
+          <span v-if="!message.isCurrent" class="message-sender">{{ message.sender }}</span>
+          <span class="message-time">{{ formatTime(message.createdAt) }}</span>
+        </div>
+        <div class="message-content">
           <p>{{ message.content }}</p>
         </div>
       </div>
-      <footer class="chat-input">
-        <input
-            v-model="newMessage"
-            type="text"
-            placeholder="Написать сообщение..."
-            @keyup.enter="sendMessage"
-            class="input-field"
-
-        />
-      </footer>
-    </section>
-    <section v-else class="chat-placeholder">
-      <p>Выберите чат, чтобы начать переписку</p>
-    </section>
-  </template>
+    </div>
+    <footer class="chat-input">
+      <input
+          v-model="newMessage"
+          type="text"
+          placeholder="Написать сообщение..."
+          @keyup.enter="sendMessage"
+          class="input-field"
+      />
+    </footer>
+  </section>
+  <section v-else class="chat-placeholder">
+    <p>Выберите чат, чтобы начать переписку</p>
+  </section>
+</template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
+import { defineComponent, ref, onMounted, watch, nextTick } from 'vue'
 import { Chat, ChatMessage } from '@/types'
 import { createMessage } from '@/api/chats'
 
@@ -44,20 +49,52 @@ export default defineComponent({
       required: true
     }
   },
-  setup (props) {
+  emits: ['messageSent'],
+  setup (props, { emit }) {
     const newMessage = ref('')
-    // Функция для отправки сообщения
+    const messagesContainer = ref<HTMLElement | null>(null) // ref на контейнер сообщений
+
+    // Прокрутка к последнему сообщению
+    const scrollToBottom = () => {
+      nextTick(() => {
+        if (messagesContainer.value) {
+          messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight // Прокрутка контейнера до самого низа
+        }
+      })
+    }
+
+    // Форматирование времени для отображения
+    const formatTime = (isoString: string) => {
+      const date = new Date(isoString)
+      const hours = String(date.getHours()).padStart(2, '0')
+      const minutes = String(date.getMinutes()).padStart(2, '0')
+
+      return `${hours}:${minutes}`
+    }
+
+    // Прокрутка при монтировании компонента
+    onMounted(() => {
+      scrollToBottom()
+    })
+
+    // Прокрутка при добавлении нового сообщения
+    watch(
+      () => props.messages.length, // Отслеживаем длину массива сообщений
+      async () => {
+        await nextTick() // Дожидаемся обновления DOM
+        scrollToBottom() // Прокручиваем вниз после обновления
+      }
+    )
+
+    // Отправка нового сообщения
     const sendMessage = async () => {
       const token = localStorage.getItem('authToken') // Получаем токен
       if (newMessage.value.trim() && props.chat && token) {
         try {
           // Отправляем сообщение на сервер
           const message = await createMessage(token, props.chat.id, newMessage.value)
-          // Очищаем поле после отправки
-          newMessage.value = ''
-          // Добавляем новое сообщение в список сообщений
-          props.messages.push(message)
-          props.chat.messages = [message]
+          newMessage.value = '' // Очищаем поле после отправки
+          emit('messageSent', message) // Отправляем новое сообщение в родительский компонент
         } catch (error) {
           console.error('Ошибка при отправке сообщения:', error)
         }
@@ -66,7 +103,9 @@ export default defineComponent({
 
     return {
       newMessage,
-      sendMessage
+      sendMessage,
+      formatTime,
+      messagesContainer // Возвращаем ссылку на контейнер сообщений
     }
   }
 })
@@ -84,15 +123,34 @@ export default defineComponent({
   }
   .messages-container {
     flex: 1;
-    padding: 10px;
+    padding: 1px;
     overflow-y: auto;
+    scroll-behavior: smooth;
   }
   .message-outgoing {
     text-align: right;
+    padding-right: 15px;
   }
   .message-incoming {
     text-align: left;
+    padding-left: 15px;
   }
+
+  .message-sender {
+    font-weight: bold;
+    color: #4CAF50;
+    padding-right: 5px;
+  }
+
+  .message-time {
+    font-size: 0.8em;
+    color: #999;
+  }
+
+  .message-content {
+    font-size: 1em;
+  }
+
   .chat-input {
     padding: 10px;
     border-top: 1px solid #ddd;

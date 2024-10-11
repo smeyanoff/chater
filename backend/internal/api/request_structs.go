@@ -14,7 +14,7 @@ type loginRequest struct {
 }
 
 type sendMessageRequest struct {
-	Content string `json:"content" binding:"required"`
+	Content string `json:"content" binding:"required"` // Текст сообщения
 }
 
 type createChatRequest struct {
