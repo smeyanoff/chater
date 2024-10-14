@@ -1,8 +1,7 @@
 <template>
   <section v-if="chat" class="chat-window">
     <header class="chat-header">{{ chat.name }}</header>
-    <div class="messages-container" ref="messagesContainer"> <!-- ref на контейнер сообщений -->
-      <!-- Проходим по сообщениям -->
+    <div class="messages-container" ref="messagesContainer">
       <div
         v-for="(message, index) in messages"
         :key="message.id"
@@ -35,7 +34,7 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted, watch, nextTick } from 'vue'
 import { Chat, ChatMessage } from '@/types'
-import { createMessage } from '@/api/chats'
+import { webSocketClient } from '@/api/websocket'
 
 export default defineComponent({
   name: 'ChatWindow',
@@ -47,23 +46,42 @@ export default defineComponent({
     messages: {
       type: Array as () => ChatMessage[],
       required: true
+    },
+    socketClient: {
+      type: Object,
+      requered: true
     }
   },
   emits: ['messageSent'],
   setup (props, { emit }) {
     const newMessage = ref('')
-    const messagesContainer = ref<HTMLElement | null>(null) // ref на контейнер сообщений
+    const messagesContainer = ref<HTMLElement | null>(null)
 
-    // Прокрутка к последнему сообщению
+    onMounted(() => {
+      scrollToBottom()
+    })
+
+    // Отправка сообщения через WebSocket
+    const sendMessage = async () => {
+      if (newMessage.value.trim()) {
+        if (webSocketClient.isConnected()) {
+          const response = await webSocketClient.send<ChatMessage>({
+            action: 'sendMessage'
+          })
+          emit('messageSent', response) // Отправляем новое сообщение в родительский компонент
+          newMessage.value = '' // Очищаем поле ввода
+        }
+      }
+    }
+
     const scrollToBottom = () => {
       nextTick(() => {
         if (messagesContainer.value) {
-          messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight // Прокрутка контейнера до самого низа
+          messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
         }
       })
     }
 
-    // Форматирование времени для отображения
     const formatTime = (isoString: string) => {
       const date = new Date(isoString)
       const hours = String(date.getHours()).padStart(2, '0')
@@ -72,46 +90,44 @@ export default defineComponent({
       return `${hours}:${minutes}`
     }
 
-    // Прокрутка при монтировании компонента
-    onMounted(() => {
-      scrollToBottom()
-    })
-
-    // Прокрутка при добавлении нового сообщения
     watch(
-      () => props.messages.length, // Отслеживаем длину массива сообщений
+      () => props.messages.length,
       async () => {
-        await nextTick() // Дожидаемся обновления DOM
-        scrollToBottom() // Прокручиваем вниз после обновления
+        await nextTick()
+        scrollToBottom()
       }
     )
 
-    // Отправка нового сообщения
-    const sendMessage = async () => {
-      const token = localStorage.getItem('authToken') // Получаем токен
-      if (newMessage.value.trim() && props.chat && token) {
-        try {
-          // Отправляем сообщение на сервер
-          const message = await createMessage(token, props.chat.id, newMessage.value)
-          newMessage.value = '' // Очищаем поле после отправки
-          emit('messageSent', message) // Отправляем новое сообщение в родительский компонент
-        } catch (error) {
-          console.error('Ошибка при отправке сообщения:', error)
+    watch(
+      () => props.chat,
+      (newChat, oldChat) => {
+        if (newChat) {
+          console.log('Выбран новый чат:', newChat.name)
+          if (webSocketClient.isConnected()) {
+            webSocketClient.close()
+          }
+          try {
+            webSocketClient.connect(`ws://localhost:54321/api/v1/chats/${newChat.id}/messages/ws`)
+            console.log('Соединение установлено!')
+          } catch (error) {
+            console.error('Ошибка при подключении к WebSocket:', error)
+          }
         }
-      }
-    }
+      },
+      { immediate: true } // Выполнить сразу при первой инициализации
+    )
 
     return {
       newMessage,
       sendMessage,
       formatTime,
-      messagesContainer // Возвращаем ссылку на контейнер сообщений
+      messagesContainer
     }
   }
 })
 </script>
 
-  <style scoped>
+<style scoped>
   .chat-window {
     flex: 1;
     display: flex;
@@ -156,14 +172,13 @@ export default defineComponent({
     border-top: 1px solid #ddd;
     display: flex;
   }
-  .input-field {
-    width: 100%;  /* Поле ввода занимает всю ширину контейнера */
+  .input-field {    width: 100%;
     padding: 10px;
     font-size: 16px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    box-sizing: border-box;  /* Для корректной работы с размерами */
-    }
+    box-sizing: border-box;
+  }
   .chat-placeholder {
     flex: 1;
     display: flex;
@@ -172,4 +187,4 @@ export default defineComponent({
     font-size: 16px;
     color: #888;
   }
-  </style>
+</style>

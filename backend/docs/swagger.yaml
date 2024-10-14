@@ -112,14 +112,6 @@ definitions:
     - password
     - username
     type: object
-  api.sendMessageRequest:
-    properties:
-      content:
-        description: Текст сообщения
-        type: string
-    required:
-    - content
-    type: object
   api.successResponse:
     properties:
       message:
@@ -144,7 +136,7 @@ info:
   title: ChatGPT Backend API
   version: "1.0"
 paths:
-  /auth/login:
+  /api/v1/auth/login:
     post:
       consumes:
       - application/json
@@ -174,7 +166,9 @@ paths:
       summary: Log in a user
       tags:
       - auth
-  /auth/register:
+      - api
+      - v1
+  /api/v1/auth/register:
     post:
       consumes:
       - application/json
@@ -208,7 +202,9 @@ paths:
       summary: Register a new user
       tags:
       - auth
-  /chats:
+      - api
+      - v1
+  /api/v1/chats:
     get:
       description: Returns a list of all chats that the authenticated user participates
         in, including chat members and recent messages.
@@ -232,6 +228,8 @@ paths:
       summary: Get all chats for the authenticated user
       tags:
       - chats
+      - api
+      - v1
     post:
       consumes:
       - application/json
@@ -263,7 +261,7 @@ paths:
       summary: Создание нового чата
       tags:
       - chats
-  /chats/{chat_id}/messages:
+  /api/v1/chats/{chat_id}/messages:
     get:
       description: Возвращает список всех сообщений в чате по его ID
       parameters:
@@ -292,43 +290,8 @@ paths:
       summary: Получение сообщений чата
       tags:
       - messages
-    post:
-      consumes:
-      - application/json
-      description: Позволяет отправить сообщение в чат, указав идентификатор чата
-        и текст сообщения
-      parameters:
-      - description: ID чата
-        in: path
-        name: chat_id
-        required: true
-        type: integer
-      - description: Данные для отправки сообщения
-        in: body
-        name: message
-        required: true
-        schema:
-          $ref: '#/definitions/api.sendMessageRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Успешное отправленное сообщение
-          schema:
-            $ref: '#/definitions/api.messageResponse'
-        "400":
-          description: Ошибка в запросе
-          schema:
-            $ref: '#/definitions/api.errorResponse'
-        "500":
-          description: Ошибка на стороне сервера
-          schema:
-            $ref: '#/definitions/api.errorResponse'
-      security:
-      - BearerAuth: []
-      summary: Отправка сообщения в чат
-      tags:
-      - messages
+      - api
+      - v1
 securityDefinitions:
   BearerAuth:
     in: header

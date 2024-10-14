@@ -21,13 +21,13 @@ func NewChatController(chatService *service.ChatService) *ChatController {
 // GetChatsForUser godoc
 // @Summary Get all chats for the authenticated user
 // @Description Returns a list of all chats that the authenticated user participates in, including chat members and recent messages.
-// @Tags chats
+// @Tags chats, api, v1
 // @Produce  json
 // @Security BearerAuth
 // @Success 200 {object} chatsResponse
 // @Failure 401 {object} errorResponse
 // @Failure 500 {object} errorResponse
-// @Router /chats [get]
+// @Router /api/v1/chats [get]
 func (c *ChatController) GetChatsForUser(ctx *gin.Context) {
 	// Получаем user_id из middleware, который проверил JWT токен
 	userID, exists := ctx.Get("user_id")
@@ -61,7 +61,7 @@ func (c *ChatController) GetChatsForUser(ctx *gin.Context) {
 // @Failure 400 {object} errorResponse "Неверный запрос"
 // @Failure 500 {object} errorResponse "Ошибка на сервере"
 // @Security BearerAuth
-// @Router /chats [post]
+// @Router /api/v1/chats [post]
 func (cc *ChatController) CreateChat(ctx *gin.Context) {
 	var request createChatRequest
 	if err := ctx.ShouldBindJSON(&request); err != nil {

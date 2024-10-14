@@ -20,7 +20,7 @@ func NewAuthController(authService *service.AuthService) *AuthController {
 // Register godoc
 // @Summary Register a new user
 // @Description Register a new user with username, email, and password
-// @Tags auth
+// @Tags auth, api, v1
 // @Accept json
 // @Produce json
 // @Param user body registerRequest true "User Data"
@@ -28,7 +28,7 @@ func NewAuthController(authService *service.AuthService) *AuthController {
 // @Failure 400 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure 409 {object} errorResponse
-// @Router /auth/register [post]
+// @Router /api/v1/auth/register [post]
 func (h *AuthController) Register(c *gin.Context) {
 	var req registerRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -53,14 +53,14 @@ func (h *AuthController) Register(c *gin.Context) {
 // Login godoc
 // @Summary Log in a user
 // @Description Log in a user and return a JWT token
-// @Tags auth
+// @Tags auth, api, v1
 // @Accept json
 // @Produce json
 // @Param credentials body loginRequest true "User Credentials"
 // @Success 200 {object} tokenResponse
 // @Failure 400 {object} errorResponse
 // @Failure 401 {object} errorResponse
-// @Router /auth/login [post]
+// @Router /api/v1/auth/login [post]
 func (h *AuthController) Login(c *gin.Context) {
 	var req loginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -74,5 +74,7 @@ func (h *AuthController) Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, tokenResponse{Token: token})
+	c.SetCookie("token", token, 3600*24, "/", "localhost", false, true)
+
+	c.JSON(http.StatusOK, successResponse{Message: "Logged in"})
 }

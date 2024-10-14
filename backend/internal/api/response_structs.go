@@ -36,11 +36,6 @@ type successResponse struct {
 	Message string `json:"message"`
 }
 
-// tokenResponse структура ответа с JWT-токеном
-type tokenResponse struct {
-	Token string `json:"token"`
-}
-
 // errorResponse структура ошибки
 type errorResponse struct {
 	Error string `json:"error"`

@@ -24,7 +24,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/auth/login": {
+        "/api/v1/auth/login": {
             "post": {
                 "description": "Log in a user and return a JWT token",
                 "consumes": [
@@ -34,7 +34,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "auth",
+                    "api",
+                    "v1"
                 ],
                 "summary": "Log in a user",
                 "parameters": [
@@ -70,7 +72,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/register": {
+        "/api/v1/auth/register": {
             "post": {
                 "description": "Register a new user with username, email, and password",
                 "consumes": [
@@ -80,7 +82,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "auth",
+                    "api",
+                    "v1"
                 ],
                 "summary": "Register a new user",
                 "parameters": [
@@ -122,7 +126,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/chats": {
+        "/api/v1/chats": {
             "get": {
                 "security": [
                     {
@@ -134,7 +138,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "chats"
+                    "chats",
+                    "api",
+                    "v1"
                 ],
                 "summary": "Get all chats for the authenticated user",
                 "responses": {
@@ -208,7 +214,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/chats/{chat_id}/messages": {
+        "/api/v1/chats/{chat_id}/messages": {
             "get": {
                 "security": [
                     {
@@ -220,7 +226,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "messages"
+                    "messages",
+                    "api",
+                    "v1"
                 ],
                 "summary": "Получение сообщений чата",
                 "parameters": [
@@ -237,62 +245,6 @@ const docTemplate = `{
                         "description": "Список сообщений",
                         "schema": {
                             "$ref": "#/definitions/api.messagesResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Ошибка в запросе",
-                        "schema": {
-                            "$ref": "#/definitions/api.errorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Ошибка на стороне сервера",
-                        "schema": {
-                            "$ref": "#/definitions/api.errorResponse"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Позволяет отправить сообщение в чат, указав идентификатор чата и текст сообщения",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "messages"
-                ],
-                "summary": "Отправка сообщения в чат",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID чата",
-                        "name": "chat_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Данные для отправки сообщения",
-                        "name": "message",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/api.sendMessageRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Успешное отправленное сообщение",
-                        "schema": {
-                            "$ref": "#/definitions/api.messageResponse"
                         }
                     },
                     "400": {
@@ -468,18 +420,6 @@ const docTemplate = `{
                 },
                 "username": {
                     "description": "Имя пользователя",
-                    "type": "string"
-                }
-            }
-        },
-        "api.sendMessageRequest": {
-            "type": "object",
-            "required": [
-                "content"
-            ],
-            "properties": {
-                "content": {
-                    "description": "Текст сообщения",
                     "type": "string"
                 }
             }

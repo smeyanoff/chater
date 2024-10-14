@@ -66,6 +66,8 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
+	apiV1 := r.Group("/api/v1")
+
 	// Настройка маршрута для Swagger UI
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -74,23 +76,23 @@ func main() {
 	authService := service.NewAuthService(userRepo, cfg.Auth.JWTKey, cfg.Auth.JWTKeyExpirationTimeH)
 	authHandler := api.NewAuthController(authService)
 
-	r.POST("/auth/register", authHandler.Register)
-	r.POST("/auth/login", authHandler.Login)
+	apiV1.POST("/auth/register", authHandler.Register)
+	apiV1.POST("/auth/login", authHandler.Login)
 
 	// auth
 	jwtSecret := cfg.Auth.JWTKey
 	auth := api.JWTAuthMiddleware(jwtSecret)
 
 	// Маршруты, требующие аутентификации
-	r.Use(auth) // Подключаем middleware
+	apiV1.Use(auth) // Подключаем middleware
 
 	// chats
 	chatRepo := repository.NewGormChatRepository(database)
 	chatService := service.NewChatService(chatRepo, userRepo)
 	chatController := api.NewChatController(chatService)
 
-	r.GET("/chats", chatController.GetChatsForUser)
-	r.POST("/chats", chatController.CreateChat)
+	apiV1.GET("/chats", chatController.GetChatsForUser)
+	apiV1.POST("/chats", chatController.CreateChat)
 
 	// messages
 	messageRepo := repository.NewGormMessageRepository(database)
@@ -98,8 +100,8 @@ func main() {
 	messageController := api.NewMessageController(messageService)
 
 	// Маршруты для работы с сообщениями
-	r.POST("/chats/:chat_id/messages", messageController.SendMessage)
-	r.GET("/chats/:chat_id/messages", messageController.GetMessages)
+	apiV1.GET("/chats/:chat_id/messages/ws", messageController.SendMessageWebSocket)
+	apiV1.GET("/chats/:chat_id/messages", messageController.GetMessages)
 
 	// Запуск HTTP-сервера
 	log.Printf("Server is running on port %s", cfg.App.Port)

@@ -11,28 +11,21 @@ export interface ChatMessagesResponse {
 }
 
 export const getAllUserChats = async (token: string): Promise<Chat[]> => {
-  const { data } = await apiClient.get<ChatResponse>('chats', {
+  const { data } = await apiClient.get<ChatResponse>('api/v1/chats', {
     headers: { Authorization: `Bearer ${token}` }
   })
   return data.chats
 }
 
 export const getChatMessages = async (token: string, chatId: number): Promise<ChatMessage[]> => {
-  const { data } = await apiClient.get<ChatMessagesResponse>(`chats/${chatId}/messages`, {
+  const { data } = await apiClient.get<ChatMessagesResponse>(`api/v1/chats/${chatId}/messages`, {
     headers: { Authorization: `Bearer ${token}` }
   })
   return data.messages
 }
 
 export const createChat = async (token: string, chatName: string): Promise<Chat> => {
-  const { data } = await apiClient.post<Chat>('chats', { chatName }, {
-    headers: { Authorization: `Bearer ${token}` }
-  })
-  return data
-}
-
-export const createMessage = async (token: string, chatId: number, content: string): Promise<ChatMessage> => {
-  const { data } = await apiClient.post<ChatMessage>(`chats/${chatId}/messages`, { content }, {
+  const { data } = await apiClient.post<Chat>('api/v1/chats', { chatName }, {
     headers: { Authorization: `Bearer ${token}` }
   })
   return data
