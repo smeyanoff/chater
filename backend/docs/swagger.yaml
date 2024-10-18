@@ -117,11 +117,6 @@ definitions:
       message:
         type: string
     type: object
-  api.tokenResponse:
-    properties:
-      token:
-        type: string
-    type: object
 host: localhost:54321
 info:
   contact:
@@ -154,7 +149,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.tokenResponse'
+            $ref: '#/definitions/api.successResponse'
         "400":
           description: Bad Request
           schema:
@@ -294,7 +289,7 @@ paths:
       - v1
 securityDefinitions:
   BearerAuth:
-    in: header
-    name: Authorization
+    in: cookie
+    name: token
     type: apiKey
 swagger: "2.0"

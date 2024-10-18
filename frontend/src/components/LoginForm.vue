@@ -34,9 +34,7 @@ export default defineComponent({
 
       try {
         const response = await login(loginData)
-        const token = response.token
-        localStorage.setItem('authToken', token)
-        console.log('Login successful:', response)
+        console.log('Login successful:', response.message)
         router.push({ name: 'chats' })
       } catch (err) {
         error.value = 'Login failed. Please try again.'

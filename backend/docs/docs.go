@@ -54,7 +54,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.tokenResponse"
+                            "$ref": "#/definitions/api.successResponse"
                         }
                     },
                     "400": {
@@ -431,21 +431,13 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
-        },
-        "api.tokenResponse": {
-            "type": "object",
-            "properties": {
-                "token": {
-                    "type": "string"
-                }
-            }
         }
     },
     "securityDefinitions": {
         "BearerAuth": {
             "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
+            "name": "token",
+            "in": "cookie"
         }
     }
 }`

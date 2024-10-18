@@ -8,8 +8,10 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@types/js-cookie": "^3.0.6",
     "@vue/eslint-config-standard": "^8.0.1",
     "core-js": "^3.8.3",
+    "typescript-cookie": "^1.0.6",
     "vue": "^3.2.13",
     "vue-router": "^4.0.3",
     "vue-standard": "^1.1.20",

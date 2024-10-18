@@ -1,14 +1,32 @@
 package api
 
 import (
+	entities "chater/internal/domain/entity"
+	"chater/internal/logging"
 	"chater/internal/service"
-	"log"
+	"fmt"
 	"net/http"
 	"strconv"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
+
+// Структура для представления клиента WebSocket
+type Client struct {
+	conn   *websocket.Conn
+	userID uint
+}
+
+// Хранилище подключенных клиентов для каждого чата
+type ChatClients struct {
+	clients map[*Client]bool
+	mu      sync.Mutex
+}
+
+// Обработчик для хранения клиентов в каждом чате
+var chatClientsMap = make(map[uint]*ChatClients)
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
@@ -28,48 +46,107 @@ func NewMessageController(messageService *service.MessageService) *MessageContro
 func (mc *MessageController) SendMessageWebSocket(c *gin.Context) {
 
 	chatID := c.Param("chat_id")
-
-	// Преобразование строки chatID в uint
 	chatIDUint, err := strconv.ParseUint(chatID, 10, 32)
 	if err != nil {
+		logging.Logger.Error(err.Error())
 		c.JSON(http.StatusBadRequest, errorResponse{Error: "invalid chat_id"})
 		return
 	}
 
+	// Получение идентификатора пользователя
+	userID, exists := c.Get("user_id")
+	if !exists {
+		logging.Logger.Error("Unauthorized user")
+		c.JSON(http.StatusUnauthorized, errorResponse{Error: "unauthorized"})
+		return
+	}
+
+	logging.Logger.Debug("Open client connection")
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
+		logging.Logger.Error(err.Error())
 		c.JSON(http.StatusInternalServerError, errorResponse{Error: "failed to upgrade connection"})
 		return
 	}
 	defer conn.Close()
 
+	client := &Client{
+		conn:   conn,
+		userID: userID.(uint),
+	}
+
+	// Добавление клиента в список клиентов для этого чата
+	addClientToChat(uint(chatIDUint), client)
+	defer removeClientFromChat(uint(chatIDUint), client)
+
 	for {
-		// Получаем идентификатор текущего пользователя
-		userID, exists := c.Get("user_id")
-		if !exists {
-			conn.WriteJSON(errorResponse{Error: "Unauthorized"})
-			return
-		}
-
 		var msg sendMessageRequest
-		// Чтение сообщений от клиента
+
+		// Чтение сообщения от клиента
 		err := conn.ReadJSON(&msg)
+		logging.Logger.Debug(fmt.Sprintf("Read client %d message from chat %d", client.userID, chatIDUint))
+
 		if err != nil {
-			log.Println("Ошибка чтения сообщения:", err)
+			if websocket.IsCloseError(err, websocket.CloseNormalClosure) {
+				logging.Logger.Debug("WebSocket connection closed by client (code 1000)")
+				break
+			}
+			logging.Logger.Error(err.Error())
 			break
 		}
 
+		logging.Logger.Debug("Process message")
 		// Обработка сообщения через сервисный слой
-		response, err := mc.messageService.SendMessage(c.Request.Context(), uint(chatIDUint), userID.(uint), string(msg.Content))
+		response, err := mc.messageService.SendMessage(c.Request.Context(), uint(chatIDUint), userID.(uint), msg.Content)
 		if err != nil {
-			conn.WriteJSON(errorResponse{Error: "Failed to send message"})
+			logging.Logger.Error(err.Error())
+			conn.WriteJSON(errorResponse{Error: "failed to send message"})
 			break
 		}
 
-		// Отправка ответа обратно клиенту
-		if err := conn.WriteJSON(response); err != nil {
-			log.Println("Ошибка отправки сообщения:", err)
-			break
+		// Отправка нового сообщения всем клиентам в чате
+		broadcastMessageToChat(uint(chatIDUint), response)
+	}
+}
+
+// Функция для добавления клиента в список клиентов чата
+func addClientToChat(chatID uint, client *Client) {
+	logging.Logger.Debug(fmt.Sprintf("Add client %d to chat %d", client.userID, chatID))
+	if chatClientsMap[chatID] == nil {
+		chatClientsMap[chatID] = &ChatClients{
+			clients: make(map[*Client]bool),
+		}
+	}
+
+	chatClientsMap[chatID].mu.Lock()
+	chatClientsMap[chatID].clients[client] = true
+	chatClientsMap[chatID].mu.Unlock()
+}
+
+// Функция для удаления клиента из списка клиентов чата
+func removeClientFromChat(chatID uint, client *Client) {
+	logging.Logger.Debug(fmt.Sprintf("Remove client %d to chat %d", client.userID, chatID))
+	if chatClientsMap[chatID] != nil {
+		chatClientsMap[chatID].mu.Lock()
+		delete(chatClientsMap[chatID].clients, client)
+		chatClientsMap[chatID].mu.Unlock()
+	}
+}
+
+// Функция для рассылки сообщения всем клиентам в чате
+func broadcastMessageToChat(chatID uint, response *entities.Message) {
+	if chatClientsMap[chatID] != nil {
+		chatClientsMap[chatID].mu.Lock()
+		defer chatClientsMap[chatID].mu.Unlock()
+
+		for client := range chatClientsMap[chatID].clients {
+			logging.Logger.Debug(fmt.Sprintf("Broadcast message to client %d", client.userID))
+			err := client.conn.WriteJSON(mapMessage(response, client.userID))
+			if err != nil {
+				logging.Logger.Error(err.Error())
+				client.conn.Close()
+				delete(chatClientsMap[chatID].clients, client)
+			}
 		}
 	}
 }

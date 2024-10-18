@@ -26,14 +26,14 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, from, next) => {
-  const isAuthenticated = !!localStorage.getItem('authToken') // Проверяем наличие токена
+// router.beforeEach((to, from, next) => {
+//   const isAuthenticated = !!Cookies.get('token') // Проверяем наличие токена
 
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    next('/auth') // Перенаправляем на страницу логина, если не авторизован
-  } else {
-    next() // Если аутентификация не требуется или пользователь авторизован
-  }
-})
+//   if (to.meta.requiresAuth && !isAuthenticated) {
+//     next('/auth') // Перенаправляем на страницу логина, если не авторизован
+//   } else {
+//     next() // Если аутентификация не требуется или пользователь авторизован
+//   }
+// })
 
 export default router

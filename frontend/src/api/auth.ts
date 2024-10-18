@@ -8,7 +8,7 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  token: string;
+  message: string;
 }
 
 export interface RegisterRequest {
@@ -24,7 +24,11 @@ export interface RegisterResponse {
 
 // Функция для аутентификации
 export const login = async (data: LoginRequest): Promise<LoginResponse> => {
-  const response = await apiClient.post<LoginResponse>('/api/v1/auth/login', data)
+  const response = await apiClient.post<LoginResponse>('/api/v1/auth/login', data,
+    {
+      withCredentials: true // Включаем отправку cookie
+    }
+  )
   return response.data
 }
 

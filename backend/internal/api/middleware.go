@@ -2,6 +2,7 @@ package api
 
 import (
 	"chater/internal/domain/auth"
+	"chater/internal/logging"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,10 +12,12 @@ import (
 // JWTAuthMiddleware - middleware для аутентификации через JWT
 func JWTAuthMiddleware(secret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		logging.Logger.Debug("Check JWT")
 		// Извлекаем JWT токен из Cookie
 		tokenString, err := c.Cookie("token")
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization token not found"})
+			logging.Logger.Error(err.Error())
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			c.Abort()
 			return
 		}
@@ -24,6 +27,7 @@ func JWTAuthMiddleware(secret string) gin.HandlerFunc {
 		})
 
 		if err != nil || !token.Valid {
+			logging.Logger.Error(err.Error())
 			c.JSON(http.StatusUnauthorized, errorResponse{Error: "Invalid or expired token"})
 			c.Abort()
 			return
@@ -32,11 +36,12 @@ func JWTAuthMiddleware(secret string) gin.HandlerFunc {
 		if claims, ok := token.Claims.(*auth.Claims); ok && token.Valid {
 			c.Set("user_id", claims.UserID)
 		} else {
+			logging.Logger.Error("Invalid token claims")
 			c.JSON(http.StatusUnauthorized, errorResponse{Error: "Invalid token claims"})
 			c.Abort()
 			return
 		}
-
+		logging.Logger.Debug("JWT is valid. Next...")
 		c.Next()
 	}
 }

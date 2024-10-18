@@ -35,8 +35,8 @@ import (
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
 // @securityDefinitions.apikey BearerAuth
-// @in header
-// @name Authorization
+// @in cookie
+// @name token
 
 // @host localhost:54321
 // @BasePath /

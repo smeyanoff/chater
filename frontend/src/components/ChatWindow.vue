@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, watch, nextTick } from 'vue'
+import { defineComponent, ref, onBeforeUnmount, watch, nextTick } from 'vue'
 import { Chat, ChatMessage } from '@/types'
 import { webSocketClient } from '@/api/websocket'
 
@@ -49,7 +49,7 @@ export default defineComponent({
     },
     socketClient: {
       type: Object,
-      requered: true
+      required: true
     }
   },
   emits: ['messageSent'],
@@ -57,23 +57,28 @@ export default defineComponent({
     const newMessage = ref('')
     const messagesContainer = ref<HTMLElement | null>(null)
 
-    onMounted(() => {
-      scrollToBottom()
+    // Закрываем WebSocket перед удалением компонента
+    onBeforeUnmount(() => {
+      if (webSocketClient.isConnected()) {
+        console.log('Closing WebSocket connection...')
+        webSocketClient.close()
+      }
     })
 
     // Отправка сообщения через WebSocket
-    const sendMessage = async () => {
-      if (newMessage.value.trim()) {
-        if (webSocketClient.isConnected()) {
-          const response = await webSocketClient.send<ChatMessage>({
-            action: 'sendMessage'
-          })
-          emit('messageSent', response) // Отправляем новое сообщение в родительский компонент
-          newMessage.value = '' // Очищаем поле ввода
-        }
+    const sendMessage = () => {
+      if (newMessage.value.trim() && webSocketClient.isConnected()) {
+        console.log('Sending new message')
+        webSocketClient.send({
+          content: newMessage.value.trim()
+        })
+        newMessage.value = '' // Очищаем поле ввода
+      } else {
+        console.error('WebSocket не подключен или сообщение пустое')
       }
     }
 
+    // Автоматическая прокрутка к последнему сообщению
     const scrollToBottom = () => {
       nextTick(() => {
         if (messagesContainer.value) {
@@ -82,14 +87,15 @@ export default defineComponent({
       })
     }
 
+    // Формат времени для сообщений
     const formatTime = (isoString: string) => {
       const date = new Date(isoString)
       const hours = String(date.getHours()).padStart(2, '0')
       const minutes = String(date.getMinutes()).padStart(2, '0')
-
       return `${hours}:${minutes}`
     }
 
+    // Следим за изменениями в сообщениях и скроллим вниз
     watch(
       () => props.messages.length,
       async () => {
@@ -98,23 +104,37 @@ export default defineComponent({
       }
     )
 
+    // Следим за сменой чатов и открываем новое WebSocket соединение
     watch(
       () => props.chat,
-      (newChat, oldChat) => {
+      async (newChat, oldChat) => {
         if (newChat) {
-          console.log('Выбран новый чат:', newChat.name)
+          console.log('Switching to new chat:', newChat.name)
+
+          // Закрываем старое соединение, если оно существует
           if (webSocketClient.isConnected()) {
+            console.log('Closing previous WebSocket connection...')
             webSocketClient.close()
           }
+
+          // Открываем новое соединение
           try {
-            webSocketClient.connect(`ws://localhost:54321/api/v1/chats/${newChat.id}/messages/ws`)
-            console.log('Соединение установлено!')
+            console.log('Opening new WebSocket connection...')
+            await webSocketClient.connect(`ws://localhost:54321/api/v1/chats/${newChat.id}/messages/ws`)
+
+            if (webSocketClient.isConnected()) {
+              // Подписываемся на получение сообщений
+              webSocketClient.onMessage((message: ChatMessage) => {
+                console.log('New message received:', message)
+                emit('messageSent', message) // Отправляем сообщение родителю
+              })
+            }
           } catch (error) {
-            console.error('Ошибка при подключении к WebSocket:', error)
+            console.error('WebSocket connection error:', error)
           }
         }
       },
-      { immediate: true } // Выполнить сразу при первой инициализации
+      { immediate: true } // Выполнить при первом рендере
     )
 
     return {
