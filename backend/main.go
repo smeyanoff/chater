@@ -100,7 +100,7 @@ func main() {
 	messageController := api.NewMessageController(messageService)
 
 	// Маршруты для работы с сообщениями
-	apiV1.GET("/chats/:chat_id/messages/ws", messageController.SendMessageWebSocket)
+	apiV1.GET("/chats/:chat_id/messages/ws", messageController.MessageWebSocketController)
 	apiV1.GET("/chats/:chat_id/messages", messageController.GetMessages)
 
 	// Запуск HTTP-сервера

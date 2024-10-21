@@ -5,7 +5,7 @@
       <div
         v-for="(message, index) in messages"
         :key="message.id"
-        :class="{'message-outgoing': message.isCurrent, 'message-incoming': !message.isCurrent}"
+        :class="['message', { 'message-outgoing': message.isCurrent, 'message-incoming': !message.isCurrent }]"
       >
         <div class="message-meta">
           <span v-if="!message.isCurrent" class="message-sender">{{ message.sender }}</span>
@@ -17,17 +17,15 @@
       </div>
     </div>
     <footer class="chat-input">
-      <input
-          v-model="newMessage"
-          type="text"
-          placeholder="Написать сообщение..."
-          @keyup.enter="sendMessage"
-          class="input-field"
+      <textarea
+        v-model="newMessage"
+        placeholder="Написать сообщение..."
+        @keyup.enter="sendMessage"
+        @input="autoResize"
+        ref="messageInput"
+        class="input-field"
       />
     </footer>
-  </section>
-  <section v-else class="chat-placeholder">
-    <p>Выберите чат, чтобы начать переписку</p>
   </section>
 </template>
 
@@ -46,16 +44,13 @@ export default defineComponent({
     messages: {
       type: Array as () => ChatMessage[],
       required: true
-    },
-    socketClient: {
-      type: Object,
-      required: true
     }
   },
   emits: ['messageSent'],
   setup (props, { emit }) {
     const newMessage = ref('')
     const messagesContainer = ref<HTMLElement | null>(null)
+    const messageInput = ref<HTMLTextAreaElement | null>(null)
 
     // Закрываем WebSocket перед удалением компонента
     onBeforeUnmount(() => {
@@ -75,6 +70,14 @@ export default defineComponent({
         newMessage.value = '' // Очищаем поле ввода
       } else {
         console.error('WebSocket не подключен или сообщение пустое')
+      }
+    }
+
+    // Функция для автоматического изменения высоты textarea
+    const autoResize = () => {
+      if (messageInput.value) {
+        messageInput.value.style.height = 'auto' // Сбросить высоту перед вычислением
+        messageInput.value.style.height = messageInput.value.scrollHeight + 'px' // Установить высоту по содержимому
       }
     }
 
@@ -107,7 +110,7 @@ export default defineComponent({
     // Следим за сменой чатов и открываем новое WebSocket соединение
     watch(
       () => props.chat,
-      async (newChat, oldChat) => {
+      async (newChat) => {
         if (newChat) {
           console.log('Switching to new chat:', newChat.name)
 
@@ -124,9 +127,15 @@ export default defineComponent({
 
             if (webSocketClient.isConnected()) {
               // Подписываемся на получение сообщений
-              webSocketClient.onMessage((message: ChatMessage) => {
-                console.log('New message received:', message)
-                emit('messageSent', message) // Отправляем сообщение родителю
+              webSocketClient.onMessage((message: unknown) => {
+              // Проверяем, является ли message объектом и имеет ли нужные поля
+                if (isChatMessage(message)) {
+                  const chatMessage = message as ChatMessage
+                  console.log('New message received:', chatMessage.content)
+                  emit('messageSent', chatMessage)
+                } else {
+                  console.error('Invalid message format:', message)
+                }
               })
             }
           } catch (error) {
@@ -137,10 +146,24 @@ export default defineComponent({
       { immediate: true } // Выполнить при первом рендере
     )
 
+    // Проверка, является ли объект ChatMessage
+    function isChatMessage (message: unknown): message is ChatMessage {
+      return (
+        typeof message === 'object' &&
+        message !== null &&
+        'id' in message &&
+        'content' in message &&
+        'createdAt' in message &&
+        'sender' in message &&
+        'isCurrent' in message
+      )
+    }
+
     return {
       newMessage,
       sendMessage,
       formatTime,
+      autoResize,
       messagesContainer
     }
   }
@@ -148,63 +171,121 @@ export default defineComponent({
 </script>
 
 <style scoped>
-  .chat-window {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-  .chat-header {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-  }
-  .messages-container {
-    flex: 1;
-    padding: 1px;
-    overflow-y: auto;
-    scroll-behavior: smooth;
-  }
-  .message-outgoing {
-    text-align: right;
-    padding-right: 15px;
-  }
-  .message-incoming {
-    text-align: left;
-    padding-left: 15px;
-  }
+.chat-window {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
 
-  .message-sender {
-    font-weight: bold;
-    color: #4CAF50;
-    padding-right: 5px;
-  }
+.chat-header {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  font-size:large;
+  font-weight: bold;
+}
 
-  .message-time {
-    font-size: 0.8em;
-    color: #999;
-  }
+.messages-container {
+  flex: 1;
+  padding: 1px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  display: flex;
+  flex-direction: column; /* Сообщения располагаются по вертикали */
+}
 
-  .message-content {
-    font-size: 1em;
-  }
+/* Основной стиль для сообщения */
+.message {
+  display: flex;
+  flex-direction: column;
+  min-width: 5%;
+  max-width: 70%;
+  margin-bottom: 10px;
+}
 
-  .chat-input {
-    padding: 10px;
-    border-top: 1px solid #ddd;
-    display: flex;
-  }
-  .input-field {    width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box;
-  }
-  .chat-placeholder {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 16px;
-    color: #888;
-  }
+/* Входящие сообщения */
+.message-incoming {
+  align-self: flex-start; /* Выровнять контейнер слева */
+  text-align: left;
+  padding-left: 15px;
+}
+
+/* Исходящие сообщения */
+.message-outgoing {
+  align-self: flex-end; /* Выровнять контейнер справа */
+  text-align: right;
+  padding-right: 15px;
+}
+
+.message-content {
+  display: inline-block;
+  background-color: #e5e5ea;
+  border-radius: 15px;
+  padding: 5px 8px;
+  word-break: break-word;
+  white-space: pre-wrap;
+  text-align: left; /* Текст всегда выравнен влево */
+}
+
+/* Входящие сообщения - изменяем цвет */
+.message-incoming .message-content {
+  background-color: #f0f0f0;
+}
+
+/* Исходящие сообщения - изменяем цвет */
+.message-outgoing .message-content {
+  background-color: #007aff;
+  color: white;
+}
+
+/* Контейнер для имени и времени */
+.message-meta {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  margin-left: 15px;
+}
+
+/* Имя отправителя */
+.message-sender {
+  font-weight: bold;
+  color: #4CAF50;
+  padding-right: 5px;
+}
+
+/* Время отправки */
+.message-time {
+  font-size: 0.8em;
+  color: #999;
+}
+
+.chat-input {
+  padding: 10px;
+  border-top: 1px solid #ddd;
+  display: flex;
+}
+
+.input-field {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+  resize: none; /* Отключаем изменение размера textarea */
+  overflow: hidden; /* Скрываем лишнюю прокрутку */
+}
+
+/* Добавляем автоматическое изменение высоты */
+.input-field:focus {
+  outline: none;
+}
+
+.chat-placeholder {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+  color: #888;
+}
 </style>

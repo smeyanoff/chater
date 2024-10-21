@@ -1,20 +1,32 @@
 <template>
   <div id="app">
-    <router-view />
+    <Sidebar />
+    <main class="main-content">
+      <router-view />
+    </main>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
+import Sidebar from '@/components/Sidebar.vue'
 
-export default defineComponent({
+export default {
   name: 'App',
-  setup () {
-    const isAuthenticated = ref(!!localStorage.getItem('authToken'))
-
-    return {
-      isAuthenticated
-    }
+  components: {
+    Sidebar
   }
-})
+}
 </script>
+
+<style scoped>
+#app {
+  display: flex;
+  height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+</style>

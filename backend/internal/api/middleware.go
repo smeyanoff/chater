@@ -17,7 +17,7 @@ func JWTAuthMiddleware(secret string) gin.HandlerFunc {
 		tokenString, err := c.Cookie("token")
 		if err != nil {
 			logging.Logger.Error(err.Error())
-			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			c.JSON(http.StatusUnauthorized, errorResponse{Error: "Named cookie not found"})
 			c.Abort()
 			return
 		}

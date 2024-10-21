@@ -42,14 +42,25 @@ func NewMessageController(messageService *service.MessageService) *MessageContro
 	return &MessageController{messageService: messageService}
 }
 
-// SendMessageWebSocket - обработчик WebSocket соединений для отправки и получения сообщений
-func (mc *MessageController) SendMessageWebSocket(c *gin.Context) {
+// MessageWebSocketController Обработчик WebSocket соединений для отправки и получения сообщений
+// @Summary Подключение к WebSocket для чата
+// @Description Подключитесь к WebSocket для получения и отправки сообщений в чате в реальном времени.
+// @Tags WebSocket, messages, api, v1
+// @Produce json
+// @Param chat_id path string true "Chat ID"
+// @Success 101 {string} string "WebSocket connection established"
+// @Failure 400 {object} errorResponse "Invalid Chat ID"
+// @Failure 401 {object} errorResponse "Unauthorized"
+// @Failure 500 {object} errorResponse "Failed to upgrade connection"
+// @Router /api/v1/chats/{chat_id}/ws [get]
+// @Security ApiKeyAuth
+func (mc *MessageController) MessageWebSocketController(c *gin.Context) {
 
 	chatID := c.Param("chat_id")
 	chatIDUint, err := strconv.ParseUint(chatID, 10, 32)
 	if err != nil {
 		logging.Logger.Error(err.Error())
-		c.JSON(http.StatusBadRequest, errorResponse{Error: "invalid chat_id"})
+		c.JSON(http.StatusBadRequest, errorResponse{Error: "Invalid Chat ID"})
 		return
 	}
 
@@ -57,7 +68,7 @@ func (mc *MessageController) SendMessageWebSocket(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
 		logging.Logger.Error("Unauthorized user")
-		c.JSON(http.StatusUnauthorized, errorResponse{Error: "unauthorized"})
+		c.JSON(http.StatusUnauthorized, errorResponse{Error: "Unauthorized"})
 		return
 	}
 
@@ -65,7 +76,7 @@ func (mc *MessageController) SendMessageWebSocket(c *gin.Context) {
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		logging.Logger.Error(err.Error())
-		c.JSON(http.StatusInternalServerError, errorResponse{Error: "failed to upgrade connection"})
+		c.JSON(http.StatusInternalServerError, errorResponse{Error: "Failed to upgrade connection"})
 		return
 	}
 	defer conn.Close()
@@ -100,7 +111,7 @@ func (mc *MessageController) SendMessageWebSocket(c *gin.Context) {
 		response, err := mc.messageService.SendMessage(c.Request.Context(), uint(chatIDUint), userID.(uint), msg.Content)
 		if err != nil {
 			logging.Logger.Error(err.Error())
-			conn.WriteJSON(errorResponse{Error: "failed to send message"})
+			conn.WriteJSON(errorResponse{Error: "Failed to send message"})
 			break
 		}
 

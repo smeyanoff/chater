@@ -6,7 +6,7 @@ import ChatView from '@/views/ChatView.vue'
 const routes = [
   {
     path: '/', // Корневой маршрут
-    redirect: '/auth' // Редирект на страницу логина
+    redirect: '/chats' // Редирект на страницу логина
   },
   {
     path: '/auth',

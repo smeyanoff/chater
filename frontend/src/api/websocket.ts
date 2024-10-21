@@ -1,7 +1,7 @@
 // websocket.ts
 class WebSocketClient {
   private socket: WebSocket | null = null;
-  private messageListeners: ((message: any) => void)[] = [];
+  private readonly messageListeners: ((message: unknown) => void)[] = [];
 
   // Подключение к WebSocket
   connect (url: string): Promise<void> {
@@ -24,19 +24,19 @@ class WebSocketClient {
 
       // Подписка на входящие сообщения
       this.socket.onmessage = (event) => {
-        const message = JSON.parse(event.data)
+        const message = JSON.parse(event.data) as unknown
         this.messageListeners.forEach(listener => listener(message)) // Вызываем все подписанные колбэки
       }
     })
   }
 
   // Добавляем возможность подписки на получение сообщений
-  onMessage (listener: (message: any) => void): void {
+  onMessage (listener: (message: unknown) => void): void {
     this.messageListeners.push(listener)
   }
 
   // Отправка сообщения через WebSocket
-  send (data: any): void {
+  send (data: Record<string, unknown>): void {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
       this.socket.send(JSON.stringify(data))
     } else {

@@ -255,6 +255,61 @@
                     }
                 }
             }
+        },
+        "/api/v1/chats/{chat_id}/ws": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Подключитесь к WebSocket для получения и отправки сообщений в чате в реальном времени.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WebSocket",
+                    "messages",
+                    "api",
+                    "v1"
+                ],
+                "summary": "Подключение к WebSocket для чата",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Chat ID",
+                        "name": "chat_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "101": {
+                        "description": "WebSocket connection established",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Chat ID",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to upgrade connection",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
