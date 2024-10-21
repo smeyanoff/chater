@@ -55,6 +55,7 @@ export default defineComponent({
   <style scoped>
   .messenger-view {
     display: flex;
-    height: 100vh;
+    height: 100%;
+    overflow: hidden;
   }
   </style>

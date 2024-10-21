@@ -58,23 +58,25 @@ export default defineComponent({
 
 <style scoped>
 .chat-list {
-  width: 25%;
+  width: 18%;
   height: 100vh;
   border-right: 1px solid #ddd;
   overflow-y: auto;
+  padding: 10px;
 }
 .chat-item {
-padding: 10px;
-border-radius: 4px;
-transition: background-color 0.3s ease;  /* Плавный переход для цвета фона */
-margin: 10px;
+  padding: 15px;
+  padding-left: 10px;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;  /* Плавный переход для цвета фона */
+}
+.chat-item h3 {
+  margin-top: 5px;
 }
   /* Стили для активного чата */
 .active .chat-item {
   background-color: #e0e0e0;  /* Цвет фона для выбранного чата */
-  border-radius: 4px;  /* Закругляем углы */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  /* Добавляем тень */
-  margin: 5px;  /* Делаем небольшой отступ */
 }
 
 /* Наведение для всех чатов */

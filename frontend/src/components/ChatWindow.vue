@@ -20,17 +20,18 @@
       <textarea
         v-model="newMessage"
         placeholder="Написать сообщение..."
-        @keyup.enter="sendMessage"
+        @keydown="handleKeydown"
         @input="autoResize"
         ref="messageInput"
         class="input-field"
+        rows="1"
       />
     </footer>
   </section>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onBeforeUnmount, watch, nextTick } from 'vue'
+import { defineComponent, ref, onBeforeUnmount, watch, nextTick, onMounted } from 'vue'
 import { Chat, ChatMessage } from '@/types'
 import { webSocketClient } from '@/api/websocket'
 
@@ -48,7 +49,7 @@ export default defineComponent({
   },
   emits: ['messageSent'],
   setup (props, { emit }) {
-    const newMessage = ref('')
+    const newMessage = ref<string>('')
     const messagesContainer = ref<HTMLElement | null>(null)
     const messageInput = ref<HTMLTextAreaElement | null>(null)
 
@@ -73,12 +74,32 @@ export default defineComponent({
       }
     }
 
+    const handleKeydown = (event: KeyboardEvent) => {
+      if (event.key === 'Enter') {
+        if (event.altKey) {
+          // Если нажато Alt + Enter, вставляем перенос строки
+          const cursorPosition = (event.target as HTMLTextAreaElement).selectionStart
+          newMessage.value =
+            newMessage.value.slice(0, cursorPosition) + '\n' + newMessage.value.slice(cursorPosition)
+          autoResize()
+          event.preventDefault() // Останавливаем стандартное поведение Enter
+        } else {
+          // Если просто Enter, то отправляем сообщение
+          sendMessage()
+          autoResize()
+          event.preventDefault() // Останавливаем стандартное поведение Enter
+        }
+      }
+    }
+
     // Функция для автоматического изменения высоты textarea
     const autoResize = () => {
-      if (messageInput.value) {
-        messageInput.value.style.height = 'auto' // Сбросить высоту перед вычислением
-        messageInput.value.style.height = messageInput.value.scrollHeight + 'px' // Установить высоту по содержимому
-      }
+      nextTick(() => {
+        if (messageInput.value) {
+          messageInput.value.style.height = 'auto' // Сброс высоты для вычисления
+          messageInput.value.style.height = messageInput.value.scrollHeight + 'px'
+        }
+      })
     }
 
     // Автоматическая прокрутка к последнему сообщению
@@ -106,6 +127,12 @@ export default defineComponent({
         scrollToBottom()
       }
     )
+
+    onMounted(() => {
+      if (messageInput.value) {
+        autoResize() // Сначала устанавливаем минимальную высоту
+      }
+    })
 
     // Следим за сменой чатов и открываем новое WebSocket соединение
     watch(
@@ -161,10 +188,11 @@ export default defineComponent({
 
     return {
       newMessage,
-      sendMessage,
       formatTime,
       autoResize,
-      messagesContainer
+      handleKeydown,
+      messagesContainer,
+      messageInput
     }
   }
 })
@@ -180,7 +208,7 @@ export default defineComponent({
 .chat-header {
   padding: 10px;
   border-bottom: 1px solid #ddd;
-  font-size:large;
+  font-size: large;
   font-weight: bold;
 }
 
@@ -197,8 +225,8 @@ export default defineComponent({
 .message {
   display: flex;
   flex-direction: column;
-  min-width: 5%;
   max-width: 70%;
+  min-width: 10%;
   margin-bottom: 10px;
 }
 
@@ -240,7 +268,6 @@ export default defineComponent({
 /* Контейнер для имени и времени */
 .message-meta {
   display: flex;
-  align-items: center;
   margin-bottom: 5px;
   margin-left: 15px;
 }
@@ -254,6 +281,7 @@ export default defineComponent({
 
 /* Время отправки */
 .message-time {
+  align-self:center;
   font-size: 0.8em;
   color: #999;
 }
@@ -272,7 +300,9 @@ export default defineComponent({
   border-radius: 4px;
   box-sizing: border-box;
   resize: none; /* Отключаем изменение размера textarea */
-  overflow: hidden; /* Скрываем лишнюю прокрутку */
+  min-height: 24px; /* Устанавливаем минимальную высоту для одной строки */
+  max-height: 240px;
+  overflow: auto;
 }
 
 /* Добавляем автоматическое изменение высоты */

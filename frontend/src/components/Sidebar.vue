@@ -10,7 +10,8 @@
           </li>
           <li>
             <router-link to="/settings" class="nav-link" active-class="active-link">
-              Настройки
+              <span class="material-icons">settings</span>
+              <span> Настройки </span>
             </router-link>
           </li>
         </ul>
@@ -43,8 +44,13 @@ export default {
     text-align: center;
     color: #333;
     padding: 20px 10px;
-    display: block;
+    display: flex;
+    flex-direction: column;
     font-size: small;
+  }
+
+  .material-icons {
+    padding-bottom: 5px;
   }
 
   .nav-link:hover {
