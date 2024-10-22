@@ -36,9 +36,9 @@ func (r *gormUserRepository) FindByEmail(ctx context.Context, email string) (*mo
 	return &user, nil
 }
 
-func (r *gormUserRepository) FindByID(ctx context.Context, id uint) (*models.User, error) {
+func (r *gormUserRepository) FindByID(ctx context.Context, userID uint) (*models.User, error) {
 	var user models.User
-	err := r.db.WithContext(ctx).First(&user, id).Error
+	err := r.db.WithContext(ctx).First(&user, userID).Error
 	return &user, err
 }
 
@@ -48,6 +48,6 @@ func (r *gormUserRepository) FindByUsername(ctx context.Context, username string
 	return &user, err
 }
 
-func (r *gormUserRepository) Delete(ctx context.Context, id uint) error {
-	return r.db.WithContext(ctx).Delete(&models.User{}, id).Error
+func (r *gormUserRepository) Delete(ctx context.Context, userID uint) error {
+	return r.db.WithContext(ctx).Delete(&models.User{}, userID).Error
 }

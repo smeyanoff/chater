@@ -17,13 +17,12 @@ func NewGormMessageRepository(db *gorm.DB) repository.MessageRepository {
 }
 
 // Создание нового сообщения
-func (r *gormMessageRepository) CreateMessage(ctx context.Context, message *entities.Message) (*entities.Message, error) {
+func (r *gormMessageRepository) Save(ctx context.Context, message *entities.Message) (*entities.Message, error) {
 	// Создание сообщения
 	if err := r.db.WithContext(ctx).Create(message).Error; err != nil {
 		return nil, err
 	}
 
-	// Предзагрузка связанных данных (например, Sender)
 	if err := r.db.WithContext(ctx).Preload("Sender").First(message, message.ID).Error; err != nil {
 		return nil, err
 	}

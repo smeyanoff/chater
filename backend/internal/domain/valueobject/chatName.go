@@ -8,7 +8,7 @@ import (
 
 // ChatName определяет пользовательский тип для имени чата
 type ChatName struct {
-	value string // Переименовали поле на "value", чтобы не конфликтовало с методом
+	value string
 }
 
 // Реализация интерфейса driver.Valuer для сохранения в базу данных

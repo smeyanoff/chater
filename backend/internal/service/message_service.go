@@ -1,7 +1,7 @@
 package service
 
 import (
-	entities "chater/internal/domain/entity"
+	models "chater/internal/domain/entity"
 	"chater/internal/domain/repository"
 	"context"
 )
@@ -15,13 +15,13 @@ func NewMessageService(messageRepo repository.MessageRepository) *MessageService
 }
 
 // Создание нового сообщения
-func (s *MessageService) SendMessage(ctx context.Context, chatID uint, senderID uint, content string) (*entities.Message, error) {
-	message := &entities.Message{
+func (s *MessageService) SendMessage(ctx context.Context, chatID uint, senderID uint, content string) (*models.Message, error) {
+	message := &models.Message{
 		Content:  content,
 		ChatID:   chatID,
 		SenderID: senderID,
 	}
-	message, err := s.messageRepo.CreateMessage(ctx, message)
+	message, err := s.messageRepo.Save(ctx, message)
 
 	// Создаем сообщение в базе данных
 	if err != nil {
@@ -32,6 +32,6 @@ func (s *MessageService) SendMessage(ctx context.Context, chatID uint, senderID 
 }
 
 // Получение всех сообщений чата
-func (s *MessageService) GetMessages(ctx context.Context, chatID uint) ([]*entities.Message, error) {
+func (s *MessageService) GetMessages(ctx context.Context, chatID uint) ([]*models.Message, error) {
 	return s.messageRepo.GetMessagesByChatID(ctx, chatID)
 }

@@ -58,7 +58,7 @@ func mapChat(chat *entities.Chat, userID uint) chatResponse {
 		Name:      chat.Name.String(),
 		CreatedAt: chat.CreatedAt.Format(time.RFC3339),
 		UpdatedAt: chat.UpdatedAt.Format(time.RFC3339),
-		Members:   mapMembers(chat.Members),
+		Members:   mapMembers(chat.ChatMembers),
 		Messages:  mapMessages(chat.Messages, userID),
 	}
 }
