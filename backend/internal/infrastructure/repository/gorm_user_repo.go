@@ -4,6 +4,7 @@ import (
 	models "chater/internal/domain/entity"
 	"chater/internal/domain/repository"
 	"chater/internal/domain/validation"
+	"chater/internal/logging"
 	"context"
 
 	"gorm.io/gorm"
@@ -38,7 +39,10 @@ func (r *gormUserRepository) FindByEmail(ctx context.Context, email string) (*mo
 
 func (r *gormUserRepository) FindByID(ctx context.Context, userID uint) (*models.User, error) {
 	var user models.User
-	err := r.db.WithContext(ctx).First(&user, userID).Error
+	err := r.db.WithContext(ctx).
+		Preload("group_users").
+		First(&user, userID).Error
+	logging.Logger.Sugar().Debug("User struct: ", userID, user)
 	return &user, err
 }
 

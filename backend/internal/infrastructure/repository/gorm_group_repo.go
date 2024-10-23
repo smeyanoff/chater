@@ -32,7 +32,23 @@ func (r *gormGroupRepository) Delete(ctx context.Context, groupID uint) error {
 func (r *gormGroupRepository) FindGroupByID(ctx context.Context, groupID uint) (*models.Group, error) {
 	var group models.Group
 
-	if err := r.db.WithContext(ctx).Preload("GroupMembers").First(&group, groupID).Error; err != nil {
+	if err := r.db.WithContext(ctx).Preload("GroupUsers").First(&group, groupID).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, errors.New("group not found")
+		}
+		return nil, err
+	}
+
+	return &group, nil
+}
+
+// Найти группу по имени
+func (r *gormGroupRepository) FindGroupByName(ctx context.Context, groupName string) (*models.Group, error) {
+	var group models.Group
+
+	if err := r.db.WithContext(ctx).Preload("GroupUsers").
+		Preload("GroupUsers").
+		Where("name = ?", groupName).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, errors.New("group not found")
 		}
@@ -48,7 +64,7 @@ func (r *gormGroupRepository) FindAllUserGroups(ctx context.Context, userID uint
 
 	err := r.db.WithContext(ctx).
 		Joins("JOIN group_users ON group_users.group_id = groups.id").
-		Preload("GroupMembers").
+		Preload("GroupUsers").
 		Where("group_users.user_id = ?", userID).
 		Find(&groups).Error
 
@@ -63,17 +79,37 @@ func (r *gormGroupRepository) FindAllUserGroups(ctx context.Context, userID uint
 func (r *gormGroupRepository) AddUserToGroup(ctx context.Context, group *models.Group, userToAdd *models.User) error {
 
 	// Добавление пользователя в группу
-	if err := r.db.WithContext(ctx).Model(group).Association("GroupMembers").Append(userToAdd); err != nil {
+	if err := r.db.WithContext(ctx).Model(group).Association("GroupUsers").Append(userToAdd); err != nil {
 		return err
 	}
 
 	return nil
 }
 
+// Проверка, что пользователь является админом
+func (r *gormGroupRepository) CheckUserIsAdmin(ctx context.Context, userID uint) (bool, error) {
+	var group models.Group
+
+	// Присоединяем таблицу пользователей и проверяем, состоит ли пользователь с указанным userID в группе "admins"
+	err := r.db.WithContext(ctx).
+		Joins("JOIN group_users ON group_users.group_id = groups.id AND group_users.user_id = ?", userID).
+		Where("groups.name = ?", "admins").
+		First(&group).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return false, nil // Если пользователь не найден в группе "admins", возвращаем false
+		}
+		return false, err // Возвращаем ошибку, если возникли другие проблемы
+	}
+
+	return true, nil // Пользователь найден в группе "admins", возвращаем true
+}
+
 // Удалить пользователя из группы
 func (r *gormGroupRepository) RemoveUserFromGroup(ctx context.Context, group *models.Group, userToRemove *models.User) error {
 
-	if err := r.db.WithContext(ctx).Model(group).Association("GroupMembers").Delete(userToRemove); err != nil {
+	if err := r.db.WithContext(ctx).Model(group).Association("GroupUsers").Delete(userToRemove); err != nil {
 		return err
 	}
 	return nil

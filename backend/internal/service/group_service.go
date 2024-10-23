@@ -5,6 +5,9 @@ import (
 	repo "chater/internal/domain/repository"
 	"chater/internal/domain/valueobject"
 	"context"
+	"errors"
+
+	"gorm.io/gorm"
 )
 
 type GroupService struct {
@@ -23,6 +26,17 @@ func (gc *GroupService) CreateGroup(ctx context.Context, name string, ownerID ui
 		return nil, err
 	}
 
+	// Провека существования группы с таким именем
+	existedGroup, err := gc.groupRepo.FindGroupByName(ctx, groupName.String())
+	if existedGroup != nil {
+		return nil, errors.New("group already exists")
+	}
+	if err != nil {
+		if err != gorm.ErrRecordNotFound {
+			return nil, err
+		}
+	}
+
 	// Поиск пользователя по ID
 	owner, err := gc.userRepo.FindByID(ctx, ownerID)
 	if err != nil {
@@ -30,9 +44,9 @@ func (gc *GroupService) CreateGroup(ctx context.Context, name string, ownerID ui
 	}
 
 	newGroup := &models.Group{
-		Name:         groupName,
-		OwnerID:      ownerID,
-		GroupMembers: []*models.User{owner},
+		Name:       groupName,
+		OwnerID:    ownerID,
+		GroupUsers: []*models.User{owner},
 	}
 	if err := gc.groupRepo.Save(ctx, newGroup); err != nil {
 		return nil, err
@@ -40,42 +54,36 @@ func (gc *GroupService) CreateGroup(ctx context.Context, name string, ownerID ui
 	return newGroup, nil
 }
 
-func (gc *GroupService) DeleteGroup(ctx context.Context, ownerID uint)
+func (gc *GroupService) DeleteGroup(ctx context.Context, ownerID uint, groupId uint) error {
 
-// // Проверяем, является ли текущий пользователь владельцем группы
-// if group.OwnerID != groupOwnerID {
-// 	return errors.New("only the group owner can add users to the group")
-// }
+	user, err := gc.userRepo.FindByID(ctx, ownerID)
+	if err != nil {
+		return err
+	}
 
-// // Проверяем, является ли пользователь уже участником группы
-// for _, member := range group.GroupMembers {
-// 	if member.ID == userToAdd.ID {
-// 		return errors.New("user is already in the group")
-// 	}
-// }
+	group, err := gc.groupRepo.FindGroupByID(ctx, groupId)
+	if err != nil {
+		return err
+	}
 
-// // Найти группу по ID
-// group, err := r.FindGroupByID(ctx, groupID)
-// if err != nil {
-// 	return err
-// }
+	// Проверка удаления системных групп
+	if group.Name.String() == "admins" {
+		return errors.New("group 'admins' couldn't be deleted")
+	}
 
-// Найти группу по ID
-// group, err := r.FindGroupByID(ctx, groupID)
-// if err != nil {
-// 	return err
-// }
+	// Проверка возможности удаления группы пользователем
+	isUserAdmin, err := gc.groupRepo.CheckUserIsAdmin(ctx, user.ID)
+	if err != nil {
+		return err
+	}
+	// Если пользователь владелец группы или администратор
+	if group.OwnerID != user.ID || !isUserAdmin {
+		return errors.New("only group owner and admin can delete group")
+	}
 
-// // Проверяем, является ли текущий пользователь владельцем группы
-// if group.OwnerID != groupOwnerID {
-// 	return errors.New("only the group owner can remove users from the group")
-// }
+	if err := gc.groupRepo.Delete(ctx, group.ID); err != nil {
+		return err
+	}
 
-// // Проверяем, является ли пользователь участником группы
-// var userFound bool
-// for _, member := range group.GroupMembers {
-// 	if member.ID == userToRemove.ID {
-// 		userFound = true
-// 		break
-// 	}
-// }
+	return nil
+}

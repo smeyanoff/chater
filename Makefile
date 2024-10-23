@@ -1,4 +1,5 @@
 
+.PHONY: .swag
 .swag:
 	cd ./backend && swag init
 

@@ -31,9 +31,9 @@ func (cc *ChatService) CreateChat(ctx context.Context, name string, ownerID uint
 	}
 
 	newChat := &models.Chat{
-		Name:        chatName,
-		OwnerID:     ownerID,
-		ChatMembers: []*models.User{owner},
+		Name:      chatName,
+		OwnerID:   ownerID,
+		ChatUsers: []*models.User{owner},
 	}
 	if err := cc.chatRepo.Save(ctx, newChat); err != nil {
 		return nil, err

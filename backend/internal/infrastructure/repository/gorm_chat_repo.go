@@ -27,7 +27,7 @@ func (r *gormChatRepository) FindAllUserChatsWithLastMessage(ctx context.Context
 	// Загрузить чаты пользователя с последним сообщением для каждого чата
 	err := r.db.WithContext(ctx).
 		Joins("JOIN chat_users ON chat_users.chat_id = chats.id").
-		Preload("ChatMembers").
+		Preload("ChatUsers").
 		Preload("Messages", func(db *gorm.DB) *gorm.DB {
 			return db.Joins("JOIN (SELECT chat_id, MAX(created_at) AS max_created_at FROM messages GROUP BY chat_id) last_messages ON messages.chat_id = last_messages.chat_id AND messages.created_at = last_messages.max_created_at")
 		}).
@@ -44,4 +44,21 @@ func (r *gormChatRepository) FindAllUserChatsWithLastMessage(ctx context.Context
 
 func (r *gormChatRepository) Delete(ctx context.Context, chatID uint) error {
 	return r.db.WithContext(ctx).Delete(&models.Chat{}, chatID).Error
+}
+
+func (r *gormChatRepository) AddChatUser(ctx context.Context, chat *models.Chat, userToAdd *models.User) error {
+	// Добавление пользователя в чат
+	if err := r.db.WithContext(ctx).Model(chat).Association("ChatUsers").Append(userToAdd); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *gormChatRepository) RemoveChatUser(ctx context.Context, chat *models.Chat, userToRemove *models.User) error {
+	// Удалить пользователя из чата
+	if err := r.db.WithContext(ctx).Model(chat).Association("ChatUsers").Delete(userToRemove); err != nil {
+		return err
+	}
+	return nil
 }
