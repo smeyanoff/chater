@@ -6,16 +6,16 @@ import (
 )
 
 // Преобразование участников чатов в структуру ответа
-func mapMembers(members []*entities.User) []chatMemberResponse {
-	var result []chatMemberResponse
+func mapMembers(members []*entities.User) []memberResponse {
+	var result []memberResponse
 	for _, member := range members {
 		result = append(result, mapMember(member))
 	}
 	return result
 }
 
-func mapMember(member *entities.User) chatMemberResponse {
-	return chatMemberResponse{
+func mapMember(member *entities.User) memberResponse {
+	return memberResponse{
 		ID:       member.ID,
 		Username: member.Username,
 	}
@@ -60,5 +60,14 @@ func mapChat(chat *entities.Chat, userID uint) chatResponse {
 		UpdatedAt: chat.UpdatedAt.Format(time.RFC3339),
 		Members:   mapMembers(chat.ChatUsers),
 		Messages:  mapMessages(chat.Messages, userID),
+	}
+}
+
+func mapGroup(group *entities.Group, userID uint) groupResponse {
+	isOwner := userID == group.OwnerID
+	return groupResponse{
+		Name:    group.Name.String(),
+		IsOwner: isOwner,
+		Members: mapMembers(group.GroupUsers),
 	}
 }

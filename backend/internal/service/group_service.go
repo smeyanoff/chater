@@ -19,6 +19,20 @@ func NewGroupService(groupRepo repo.GroupRepository, userRepo repo.UserRepositor
 	return GroupService{groupRepo: groupRepo, userRepo: userRepo}
 }
 
+// Проверка возможности удаления группы пользователем
+func (gc *GroupService) checkRights(ctx context.Context, ownerID uint, userID uint) error {
+	isUserAdmin, err := gc.groupRepo.CheckUserIsAdmin(ctx, userID)
+	if err != nil {
+		return err
+	}
+	// Если пользователь владелец группы или администратор
+	if ownerID == userID || !isUserAdmin {
+		return errors.New("only group owner and admin can do this")
+	}
+
+	return nil
+}
+
 func (gc *GroupService) CreateGroup(ctx context.Context, name string, ownerID uint) (*models.Group, error) {
 	// Валидация имени группы
 	groupName, err := valueobject.NewGroupName(name)
@@ -31,14 +45,12 @@ func (gc *GroupService) CreateGroup(ctx context.Context, name string, ownerID ui
 	if existedGroup != nil {
 		return nil, errors.New("group already exists")
 	}
-	if err != nil {
-		if err != gorm.ErrRecordNotFound {
-			return nil, err
-		}
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
 	}
 
 	// Поиск пользователя по ID
-	owner, err := gc.userRepo.FindByID(ctx, ownerID)
+	owner, err := gc.userRepo.FindUserByID(ctx, ownerID)
 	if err != nil {
 		return nil, err
 	}
@@ -54,15 +66,14 @@ func (gc *GroupService) CreateGroup(ctx context.Context, name string, ownerID ui
 	return newGroup, nil
 }
 
-func (gc *GroupService) DeleteGroup(ctx context.Context, ownerID uint, groupId uint) error {
+func (gc *GroupService) DeleteGroup(ctx context.Context, ownerID uint, groupID uint) error {
 
-	user, err := gc.userRepo.FindByID(ctx, ownerID)
+	group, err := gc.groupRepo.FindGroupByID(ctx, groupID)
 	if err != nil {
 		return err
 	}
 
-	group, err := gc.groupRepo.FindGroupByID(ctx, groupId)
-	if err != nil {
+	if err := gc.checkRights(ctx, group.OwnerID, ownerID); err != nil {
 		return err
 	}
 
@@ -71,17 +82,52 @@ func (gc *GroupService) DeleteGroup(ctx context.Context, ownerID uint, groupId u
 		return errors.New("group 'admins' couldn't be deleted")
 	}
 
-	// Проверка возможности удаления группы пользователем
-	isUserAdmin, err := gc.groupRepo.CheckUserIsAdmin(ctx, user.ID)
+	if err := gc.groupRepo.Delete(ctx, group.ID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (gc *GroupService) AddUserToGroup(ctx context.Context, ownerID uint, userToAddID uint, groupID uint) error {
+
+	group, err := gc.groupRepo.FindGroupByID(ctx, groupID)
 	if err != nil {
 		return err
 	}
-	// Если пользователь владелец группы или администратор
-	if group.OwnerID != user.ID || !isUserAdmin {
-		return errors.New("only group owner and admin can delete group")
+
+	userToAdd, err := gc.userRepo.FindUserByID(ctx, userToAddID)
+	if err != nil {
+		return err
 	}
 
-	if err := gc.groupRepo.Delete(ctx, group.ID); err != nil {
+	if err := gc.checkRights(ctx, group.OwnerID, ownerID); err != nil {
+		return err
+	}
+
+	if err := gc.groupRepo.AddUserToGroup(ctx, group, userToAdd); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (gc *GroupService) DeleteUserFromGroup(ctx context.Context, ownerID uint, userToRemoveID uint, groupID uint) error {
+	group, err := gc.groupRepo.FindGroupByID(ctx, groupID)
+	if err != nil {
+		return err
+	}
+
+	userToRemove, err := gc.userRepo.FindUserByID(ctx, userToRemoveID)
+	if err != nil {
+		return err
+	}
+
+	if err := gc.checkRights(ctx, group.OwnerID, ownerID); err != nil {
+		return err
+	}
+
+	if err := gc.groupRepo.RemoveUserFromGroup(ctx, group, userToRemove); err != nil {
 		return err
 	}
 

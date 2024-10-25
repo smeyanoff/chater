@@ -4,6 +4,7 @@ import (
 	"chater/internal/config"
 	models "chater/internal/domain/entity"
 	_ "chater/internal/domain/valueobject"
+	"chater/internal/logging"
 	"fmt"
 	"log"
 	"time"
@@ -30,7 +31,9 @@ func ConnectDB(cfg *config.Config) (*gorm.DB, error) {
 			return db, nil
 		}
 
-		log.Printf("Failed to connect to the database. Attempt %d/%d. Retrying in %s...", i+1, maxRetries, retryDelay)
+		logging.Logger.Info(
+			fmt.Sprintf("Failed to connect to the database. Attempt %d/%d. Retrying in %s...",
+				i+1, maxRetries, retryDelay))
 		time.Sleep(retryDelay) // Задержка перед повторной попыткой
 	}
 	return nil, fmt.Errorf("could not connect to the database after %d attempts: %w", maxRetries, err)
@@ -42,11 +45,12 @@ func AutoMigrate(db *gorm.DB) error {
 		&models.User{},
 		&models.Chat{},
 		&models.Message{},
+		&models.Group{},
 	)
 	if err != nil {
 		return err
 	}
 
-	log.Println("Database migration completed successfully")
+	logging.Logger.Info("Database migration completed successfully")
 	return nil
 }

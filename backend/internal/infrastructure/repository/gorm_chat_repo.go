@@ -5,6 +5,7 @@ import (
 	"chater/internal/domain/repository"
 	_ "chater/internal/domain/valueobject"
 	"context"
+	"errors"
 
 	"gorm.io/gorm"
 )
@@ -19,6 +20,22 @@ func NewGormChatRepository(db *gorm.DB) repository.ChatRepository {
 
 func (r *gormChatRepository) Save(ctx context.Context, chat *models.Chat) error {
 	return r.db.WithContext(ctx).Create(chat).Error
+}
+
+func (r *gormChatRepository) FindChatByID(ctx context.Context, chatID uint) (*models.Chat, error) {
+	var chat models.Chat
+	if err := r.db.WithContext(ctx).
+		Preload("ChatUsers").
+		Preload("Messages").
+		First(&chat, chatID).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, errors.New("chat not found")
+		} else {
+			return nil, err
+		}
+	}
+
+	return &chat, nil
 }
 
 func (r *gormChatRepository) FindAllUserChatsWithLastMessage(ctx context.Context, userID uint) ([]*models.Chat, error) {

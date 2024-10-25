@@ -37,7 +37,7 @@ func (r *gormUserRepository) FindByEmail(ctx context.Context, email string) (*mo
 	return &user, nil
 }
 
-func (r *gormUserRepository) FindByID(ctx context.Context, userID uint) (*models.User, error) {
+func (r *gormUserRepository) FindUserByID(ctx context.Context, userID uint) (*models.User, error) {
 	var user models.User
 	err := r.db.WithContext(ctx).
 		Preload("group_users").

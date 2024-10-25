@@ -45,14 +45,14 @@ func NewMessageController(messageService *service.MessageService) *MessageContro
 // MessageWebSocketController Обработчик WebSocket соединений для отправки и получения сообщений
 // @Summary Подключение к WebSocket для чата
 // @Description Подключитесь к WebSocket для получения и отправки сообщений в чате в реальном времени.
-// @Tags WebSocket, messages, api, v1
+// @Tags WebSocket, messages, v1
 // @Produce json
 // @Param chat_id path string true "Chat ID"
 // @Success 101 {string} string "WebSocket connection established"
 // @Failure 400 {object} errorResponse "Invalid Chat ID"
 // @Failure 401 {object} errorResponse "Unauthorized"
 // @Failure 500 {object} errorResponse "Failed to upgrade connection"
-// @Router /api/v1/chats/{chat_id}/ws [get]
+// @Router /v1/chats/{chat_id}/ws [get]
 // @Security ApiKeyAuth
 func (mc *MessageController) MessageWebSocketController(c *gin.Context) {
 
@@ -165,7 +165,7 @@ func broadcastMessageToChat(chatID uint, response *entities.Message) {
 // GetMessages godoc
 // @Summary Получение сообщений чата
 // @Description Возвращает список всех сообщений в чате по его ID
-// @Tags messages, api, v1
+// @Tags messages, v1
 // @Produce  json
 // @Param  chat_id path uint true "ID чата"
 // @Success 200 {object} messagesResponse "Список сообщений"
@@ -175,7 +175,11 @@ func broadcastMessageToChat(chatID uint, response *entities.Message) {
 // @Router /api/v1/chats/{chat_id}/messages [get]
 func (mc *MessageController) GetMessages(ctx *gin.Context) {
 	chatID := ctx.Param("chat_id")
-	userID := ctx.MustGet("user_id").(uint)
+	userID, exists := ctx.Get("user_id") // Получаем ID пользователя (например, из JWT)
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, errorResponse{Error: "Unauthorized"})
+		return
+	}
 
 	// Преобразование строки chatID в uint
 	chatIDUint, err := strconv.ParseUint(chatID, 10, 32)
@@ -190,5 +194,5 @@ func (mc *MessageController) GetMessages(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, messagesResponse{Messages: mapMessages(messages, userID)})
+	ctx.JSON(http.StatusOK, messagesResponse{Messages: mapMessages(messages, userID.(uint))})
 }

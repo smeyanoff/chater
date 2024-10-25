@@ -21,13 +21,13 @@ func NewChatController(chatService *service.ChatService) *ChatController {
 // GetChatsForUser godoc
 // @Summary Get all chats for the authenticated user
 // @Description Returns a list of all chats that the authenticated user participates in, including chat members and recent messages.
-// @Tags chats, api, v1
+// @Tags chats, v1
 // @Produce  json
 // @Security BearerAuth
 // @Success 200 {object} chatsResponse
 // @Failure 401 {object} errorResponse
 // @Failure 500 {object} errorResponse
-// @Router /api/v1/chats [get]
+// @Router /v1/chats [get]
 func (c *ChatController) GetChatsForUser(ctx *gin.Context) {
 	// Получаем user_id из middleware, который проверил JWT токен
 	userID, exists := ctx.Get("user_id")
@@ -53,7 +53,7 @@ func (c *ChatController) GetChatsForUser(ctx *gin.Context) {
 // CreateChat godoc
 // @Summary Создание нового чата
 // @Description Создаёт новый чат с указанным именем и возвращает его данные
-// @Tags chats
+// @Tags chats, v1
 // @Accept  json
 // @Produce  json
 // @Param   chat body createChatRequest true "Данные для создания чата"
@@ -61,7 +61,7 @@ func (c *ChatController) GetChatsForUser(ctx *gin.Context) {
 // @Failure 400 {object} errorResponse "Неверный запрос"
 // @Failure 500 {object} errorResponse "Ошибка на сервере"
 // @Security BearerAuth
-// @Router /api/v1/chats [post]
+// @Router /v1/chats [post]
 func (cc *ChatController) CreateChat(ctx *gin.Context) {
 	var request createChatRequest
 	if err := ctx.ShouldBindJSON(&request); err != nil {
@@ -69,13 +69,17 @@ func (cc *ChatController) CreateChat(ctx *gin.Context) {
 		return
 	}
 
-	ownerID := ctx.MustGet("user_id").(uint) // Получаем ID пользователя (например, из JWT)
+	ownerID, exists := ctx.Get("user_id") // Получаем ID пользователя (например, из JWT)
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, errorResponse{Error: "Unauthorized"})
+		return
+	}
 
-	chat, err := cc.chatService.CreateChat(ctx, request.Name, ownerID)
+	chat, err := cc.chatService.CreateChat(ctx, request.Name, ownerID.(uint))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: "Failed to create chat"})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, mapChat(chat, ownerID))
+	ctx.JSON(http.StatusOK, mapChat(chat, ownerID.(uint)))
 }

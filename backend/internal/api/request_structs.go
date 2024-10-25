@@ -20,3 +20,7 @@ type sendMessageRequest struct {
 type createChatRequest struct {
 	Name string `json:"name" binding:"required"` // Название чата
 }
+
+type createGroupRequest struct {
+	Name string `json:"name" binding:"required"` // Название группы
+}

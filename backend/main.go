@@ -54,6 +54,11 @@ func main() {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
 
+	// Repos
+	chatRepo := repository.NewGormChatRepository(database)
+	userRepo := repository.NewGormUserRepository(database)
+	messageRepo := repository.NewGormMessageRepository(database)
+
 	// Используем Gin для роутинга
 	r := gin.Default()
 
@@ -66,13 +71,12 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	apiV1 := r.Group("/api/v1")
+	apiV1 := r.Group("/v1")
 
 	// Настройка маршрута для Swagger UI
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// users
-	userRepo := repository.NewGormUserRepository(database)
 	authService := service.NewAuthService(userRepo, cfg.Auth.JWTKey, cfg.Auth.JWTKeyExpirationTimeH)
 	authHandler := api.NewAuthController(authService)
 
@@ -87,7 +91,7 @@ func main() {
 	apiV1.Use(auth) // Подключаем middleware
 
 	// chats
-	chatRepo := repository.NewGormChatRepository(database)
+
 	chatService := service.NewChatService(chatRepo, userRepo)
 	chatController := api.NewChatController(chatService)
 
@@ -95,7 +99,6 @@ func main() {
 	apiV1.POST("/chats", chatController.CreateChat)
 
 	// messages
-	messageRepo := repository.NewGormMessageRepository(database)
 	messageService := service.NewMessageService(messageRepo)
 	messageController := api.NewMessageController(messageService)
 
