@@ -15,8 +15,8 @@ type GroupService struct {
 	userRepo  repo.UserRepository
 }
 
-func NewGroupService(groupRepo repo.GroupRepository, userRepo repo.UserRepository) GroupService {
-	return GroupService{groupRepo: groupRepo, userRepo: userRepo}
+func NewGroupService(groupRepo repo.GroupRepository, userRepo repo.UserRepository) *GroupService {
+	return &GroupService{groupRepo: groupRepo, userRepo: userRepo}
 }
 
 // Проверка возможности удаления группы пользователем

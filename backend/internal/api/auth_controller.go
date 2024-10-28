@@ -21,7 +21,7 @@ func NewAuthController(authService *service.AuthService) *AuthController {
 // Register godoc
 // @Summary Register a new user
 // @Description Register a new user with username, email, and password
-// @Tags auth, api, v1
+// @Tags auth, v1
 // @Accept json
 // @Produce json
 // @Param user body registerRequest true "User Data"
@@ -29,7 +29,7 @@ func NewAuthController(authService *service.AuthService) *AuthController {
 // @Failure 400 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure 409 {object} errorResponse
-// @Router /api/v1/auth/register [post]
+// @Router /v1/auth/register [post]
 func (h *AuthController) Register(c *gin.Context) {
 	logging.Logger.Info("Register request")
 	var req registerRequest
@@ -59,16 +59,16 @@ func (h *AuthController) Register(c *gin.Context) {
 // Login godoc
 // @Summary Log in a user
 // @Description Log in a user and return a JWT token
-// @Tags auth, api, v1
+// @Tags auth, v1
 // @Accept json
 // @Produce json
 // @Param credentials body loginRequest true "User Credentials"
 // @Success 200 {object} successResponse
 // @Failure 400 {object} errorResponse
 // @Failure 401 {object} errorResponse
-// @Router /api/v1/auth/login [post]
+// @Router /v1/auth/login [post]
 func (h *AuthController) Login(c *gin.Context) {
-	logging.Logger.Info("Login request")
+	logging.Logger.Info("Login request...")
 	var req loginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		logging.Logger.Error(err.Error())
@@ -78,12 +78,11 @@ func (h *AuthController) Login(c *gin.Context) {
 
 	token, err := h.authService.Login(c.Request.Context(), req.Username, req.Password)
 	if err != nil {
-		logging.Logger.Info("Invalid username or password")
+		logging.Logger.Error("Invalid username or password")
 		c.JSON(http.StatusUnauthorized, errorResponse{Error: "Invalid username or password"})
 		return
 	}
 
-	logging.Logger.Debug(token)
 	c.SetCookie("token", token, 3600*24, "/", "", false, true)
 
 	c.JSON(http.StatusOK, successResponse{Message: "Loggin success"})

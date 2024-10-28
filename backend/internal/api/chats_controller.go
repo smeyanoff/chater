@@ -1,7 +1,9 @@
 package api
 
 import (
+	"chater/internal/logging"
 	"chater/internal/service"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -29,17 +31,21 @@ func NewChatController(chatService *service.ChatService) *ChatController {
 // @Failure 500 {object} errorResponse
 // @Router /v1/chats [get]
 func (c *ChatController) GetChatsForUser(ctx *gin.Context) {
+	logging.Logger.Debug("Getting chats response...")
+
 	// Получаем user_id из middleware, который проверил JWT токен
 	userID, exists := ctx.Get("user_id")
 	if !exists {
-		ctx.JSON(http.StatusUnauthorized, errorResponse{Error: "Unauthorized"})
+		logging.Logger.Error(ErrUnauthorized)
+		ctx.JSON(http.StatusUnauthorized, errorResponse{Error: ErrUnauthorized})
 		return
 	}
 
 	// Вызываем сервис для получения чатов
 	chats, err := c.chatService.GetUserChats(ctx, userID.(uint))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
+		logging.Logger.Error(fmt.Sprintf("Error getting chats: %s", err.Error()))
+		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: "Error getting chats"})
 		return
 	}
 
@@ -48,6 +54,7 @@ func (c *ChatController) GetChatsForUser(ctx *gin.Context) {
 
 	// Отправляем ответ
 	ctx.JSON(http.StatusOK, chatsResponse{Chats: response})
+	logging.Logger.Debug("Getting chats succeded")
 }
 
 // CreateChat godoc
@@ -65,13 +72,13 @@ func (c *ChatController) GetChatsForUser(ctx *gin.Context) {
 func (cc *ChatController) CreateChat(ctx *gin.Context) {
 	var request createChatRequest
 	if err := ctx.ShouldBindJSON(&request); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse{Error: "Invalid request"})
+		ctx.JSON(http.StatusBadRequest, errorResponse{Error: ErrInvalidRequest})
 		return
 	}
 
 	ownerID, exists := ctx.Get("user_id") // Получаем ID пользователя (например, из JWT)
 	if !exists {
-		ctx.JSON(http.StatusUnauthorized, errorResponse{Error: "Unauthorized"})
+		ctx.JSON(http.StatusUnauthorized, errorResponse{Error: ErrUnauthorized})
 		return
 	}
 

@@ -67,8 +67,8 @@ func (mc *MessageController) MessageWebSocketController(c *gin.Context) {
 	// Получение идентификатора пользователя
 	userID, exists := c.Get("user_id")
 	if !exists {
-		logging.Logger.Error("Unauthorized user")
-		c.JSON(http.StatusUnauthorized, errorResponse{Error: "Unauthorized"})
+		logging.Logger.Error(ErrUnauthorized)
+		c.JSON(http.StatusUnauthorized, errorResponse{Error: ErrUnauthorized})
 		return
 	}
 
@@ -172,12 +172,12 @@ func broadcastMessageToChat(chatID uint, response *entities.Message) {
 // @Failure 400 {object} errorResponse "Ошибка в запросе"
 // @Failure 500 {object} errorResponse "Ошибка на стороне сервера"
 // @Security BearerAuth
-// @Router /api/v1/chats/{chat_id}/messages [get]
+// @Router /v1/chats/{chat_id}/messages [get]
 func (mc *MessageController) GetMessages(ctx *gin.Context) {
 	chatID := ctx.Param("chat_id")
 	userID, exists := ctx.Get("user_id") // Получаем ID пользователя (например, из JWT)
 	if !exists {
-		ctx.JSON(http.StatusUnauthorized, errorResponse{Error: "Unauthorized"})
+		ctx.JSON(http.StatusUnauthorized, errorResponse{Error: ErrUnauthorized})
 		return
 	}
 

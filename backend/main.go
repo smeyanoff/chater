@@ -58,6 +58,19 @@ func main() {
 	chatRepo := repository.NewGormChatRepository(database)
 	userRepo := repository.NewGormUserRepository(database)
 	messageRepo := repository.NewGormMessageRepository(database)
+	groupRepo := repository.NewGormGroupRepository(database)
+
+	// Serices
+	authService := service.NewAuthService(userRepo, cfg.Auth.JWTKey, cfg.Auth.JWTKeyExpirationTimeH)
+	chatService := service.NewChatService(chatRepo, userRepo, groupRepo)
+	messageService := service.NewMessageService(messageRepo)
+	groupService := service.NewGroupService(groupRepo, userRepo)
+
+	// Controllers
+	authHandler := api.NewAuthController(authService)
+	chatController := api.NewChatController(chatService)
+	messageController := api.NewMessageController(messageService)
+	groupController := api.NewGroupController(groupService)
 
 	// Используем Gin для роутинга
 	r := gin.Default()
@@ -76,35 +89,32 @@ func main() {
 	// Настройка маршрута для Swagger UI
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// users
-	authService := service.NewAuthService(userRepo, cfg.Auth.JWTKey, cfg.Auth.JWTKeyExpirationTimeH)
-	authHandler := api.NewAuthController(authService)
+	// auth
 
 	apiV1.POST("/auth/register", authHandler.Register)
 	apiV1.POST("/auth/login", authHandler.Login)
 
-	// auth
+	// middelware secured JWT endpoints
 	jwtSecret := cfg.Auth.JWTKey
 	auth := api.JWTAuthMiddleware(jwtSecret)
-
-	// Маршруты, требующие аутентификации
-	apiV1.Use(auth) // Подключаем middleware
+	apiV1.Use(auth) // Connect middleware
 
 	// chats
-
-	chatService := service.NewChatService(chatRepo, userRepo)
-	chatController := api.NewChatController(chatService)
 
 	apiV1.GET("/chats", chatController.GetChatsForUser)
 	apiV1.POST("/chats", chatController.CreateChat)
 
 	// messages
-	messageService := service.NewMessageService(messageRepo)
-	messageController := api.NewMessageController(messageService)
 
-	// Маршруты для работы с сообщениями
 	apiV1.GET("/chats/:chat_id/messages/ws", messageController.MessageWebSocketController)
 	apiV1.GET("/chats/:chat_id/messages", messageController.GetMessages)
+
+	// groups
+
+	apiV1.POST("/groups", groupController.CreateGroup)
+	apiV1.DELETE("/groups/:group_id", groupController.DeleteGroup)
+	apiV1.POST("/groups/:group_id/user", groupController.AddUserToGroup)
+	apiV1.DELETE("/groups/:group_id/user", groupController.DeleteUserFromGroup)
 
 	// Запуск HTTP-сервера
 	log.Printf("Server is running on port %s", cfg.App.Port)

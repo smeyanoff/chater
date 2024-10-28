@@ -24,3 +24,7 @@ type createChatRequest struct {
 type createGroupRequest struct {
 	Name string `json:"name" binding:"required"` // Название группы
 }
+
+type userGroupRequest struct {
+	UserID uint `json:"userID" binding:"requered"`
+}
