@@ -62,7 +62,7 @@ func (gc *GroupController) CreateGroup(ctx *gin.Context) {
 // DeleteGroup удаляет группу по её идентификатору
 // @Summary Удаление группы
 // @Description Удаляет группу по её идентификатору, если пользователь является её владельцем
-// @Tags groups, v1
+// @Tags Groups, V1
 // @Param group_id path string true "ID группы для удаления"
 // @Success 200 {object} successResponse "Группа успешно удалена"
 // @Failure 400 {object} errorResponse "Неверный идентификатор группы"
@@ -101,11 +101,11 @@ func (gc *GroupController) DeleteGroup(ctx *gin.Context) {
 // AddUserToChat добавляет пользователя в группу
 // @Summary Добавление пользователя в группу
 // @Description Добавляет пользователя в группу по идентификатору группы
-// @Tags groups, v1
+// @Tags Groups, V1
 // @Accept json
 // @Produce json
 // @Param group_id path string true "ID группы"
-// @Param addUserToGroupRequest body addUserToGroupRequest true "Данные для добавления пользователя"
+// @Param addUserToGroupRequest body userGroupRequest true "Данные для добавления пользователя"
 // @Success 200 {object} successResponse "Пользователь успешно добавлен в группу"
 // @Failure 400 {object} errorResponse "Неверный запрос или неверный ID группы"
 // @Failure 401 {object} errorResponse "Пользователь не авторизован"
@@ -152,7 +152,7 @@ func (gc *GroupController) AddUserToGroup(ctx *gin.Context) {
 // DeleteUserFromGroup удаляет пользователя из группы
 // @Summary Удаление пользователя из группы
 // @Description Удаляет указанного пользователя из группы, если действие выполняет владелец или администратор группы
-// @Tags groups, v1
+// @Tags Groups, V1
 // @Accept json
 // @Produce json
 // @Param group_id path string true "ID группы"

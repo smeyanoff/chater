@@ -23,7 +23,7 @@ func NewChatController(chatService *service.ChatService) *ChatController {
 // GetChatsForUser godoc
 // @Summary Get all chats for the authenticated user
 // @Description Returns a list of all chats that the authenticated user participates in, including chat members and recent messages.
-// @Tags chats, v1
+// @Tags Chats, V1
 // @Produce  json
 // @Security BearerAuth
 // @Success 200 {object} chatsResponse
@@ -60,7 +60,7 @@ func (c *ChatController) GetChatsForUser(ctx *gin.Context) {
 // CreateChat godoc
 // @Summary Создание нового чата
 // @Description Создаёт новый чат с указанным именем и возвращает его данные
-// @Tags chats, v1
+// @Tags Chats, V1
 // @Accept  json
 // @Produce  json
 // @Param   chat body createChatRequest true "Данные для создания чата"

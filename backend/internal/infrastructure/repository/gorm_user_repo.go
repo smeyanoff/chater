@@ -40,7 +40,7 @@ func (r *gormUserRepository) FindByEmail(ctx context.Context, email string) (*mo
 func (r *gormUserRepository) FindUserByID(ctx context.Context, userID uint) (*models.User, error) {
 	var user models.User
 	err := r.db.WithContext(ctx).
-		Preload("group_users").
+		Preload("InGroups").
 		First(&user, userID).Error
 	logging.Logger.Sugar().Debug("User struct: ", userID, user)
 	return &user, err

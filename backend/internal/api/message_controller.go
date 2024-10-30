@@ -45,7 +45,7 @@ func NewMessageController(messageService *service.MessageService) *MessageContro
 // MessageWebSocketController Обработчик WebSocket соединений для отправки и получения сообщений
 // @Summary Подключение к WebSocket для чата
 // @Description Подключитесь к WebSocket для получения и отправки сообщений в чате в реальном времени.
-// @Tags WebSocket, messages, v1
+// @Tags WebSocket, Messages, V1
 // @Produce json
 // @Param chat_id path string true "Chat ID"
 // @Success 101 {string} string "WebSocket connection established"
@@ -165,7 +165,7 @@ func broadcastMessageToChat(chatID uint, response *entities.Message) {
 // GetMessages godoc
 // @Summary Получение сообщений чата
 // @Description Возвращает список всех сообщений в чате по его ID
-// @Tags messages, v1
+// @Tags Messages, V1
 // @Produce  json
 // @Param  chat_id path uint true "ID чата"
 // @Success 200 {object} messagesResponse "Список сообщений"

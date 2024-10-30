@@ -1,14 +1,5 @@
 basePath: /
 definitions:
-  api.chatMemberResponse:
-    properties:
-      id:
-        description: Идентификатор пользователя
-        type: integer
-      username:
-        description: Имя пользователя
-        type: string
-    type: object
   api.chatResponse:
     properties:
       createdAt:
@@ -20,7 +11,7 @@ definitions:
       members:
         description: Список участников чата
         items:
-          $ref: '#/definitions/api.chatMemberResponse'
+          $ref: '#/definitions/api.memberResponse'
         type: array
       messages:
         description: Последние сообщения чата
@@ -50,9 +41,28 @@ definitions:
     required:
     - name
     type: object
+  api.createGroupRequest:
+    properties:
+      name:
+        description: Название группы
+        type: string
+    required:
+    - name
+    type: object
   api.errorResponse:
     properties:
       error:
+        type: string
+    type: object
+  api.groupResponse:
+    properties:
+      isOwner:
+        type: boolean
+      members:
+        items:
+          $ref: '#/definitions/api.memberResponse'
+        type: array
+      name:
         type: string
     type: object
   api.loginRequest:
@@ -66,6 +76,15 @@ definitions:
     required:
     - password
     - username
+    type: object
+  api.memberResponse:
+    properties:
+      id:
+        description: Идентификатор пользователя
+        type: integer
+      username:
+        description: Имя пользователя
+        type: string
     type: object
   api.messageResponse:
     properties:
@@ -117,6 +136,11 @@ definitions:
       message:
         type: string
     type: object
+  api.userGroupRequest:
+    properties:
+      userID:
+        type: integer
+    type: object
 host: localhost:54321
 info:
   contact:
@@ -131,7 +155,7 @@ info:
   title: ChatGPT Backend API
   version: "1.0"
 paths:
-  /api/v1/auth/login:
+  /v1/auth/login:
     post:
       consumes:
       - application/json
@@ -160,10 +184,9 @@ paths:
             $ref: '#/definitions/api.errorResponse'
       summary: Log in a user
       tags:
-      - auth
-      - api
-      - v1
-  /api/v1/auth/register:
+      - Auth
+      - V1
+  /v1/auth/register:
     post:
       consumes:
       - application/json
@@ -196,10 +219,9 @@ paths:
             $ref: '#/definitions/api.errorResponse'
       summary: Register a new user
       tags:
-      - auth
-      - api
-      - v1
-  /api/v1/chats:
+      - Auth
+      - V1
+  /v1/chats:
     get:
       description: Returns a list of all chats that the authenticated user participates
         in, including chat members and recent messages.
@@ -222,9 +244,8 @@ paths:
       - BearerAuth: []
       summary: Get all chats for the authenticated user
       tags:
-      - chats
-      - api
-      - v1
+      - Chats
+      - V1
     post:
       consumes:
       - application/json
@@ -255,8 +276,9 @@ paths:
       - BearerAuth: []
       summary: Создание нового чата
       tags:
-      - chats
-  /api/v1/chats/{chat_id}/messages:
+      - Chats
+      - V1
+  /v1/chats/{chat_id}/messages:
     get:
       description: Возвращает список всех сообщений в чате по его ID
       parameters:
@@ -284,10 +306,9 @@ paths:
       - BearerAuth: []
       summary: Получение сообщений чата
       tags:
-      - messages
-      - api
-      - v1
-  /api/v1/chats/{chat_id}/ws:
+      - Messages
+      - V1
+  /v1/chats/{chat_id}/ws:
     get:
       description: Подключитесь к WebSocket для получения и отправки сообщений в чате
         в реальном времени.
@@ -321,9 +342,162 @@ paths:
       summary: Подключение к WebSocket для чата
       tags:
       - WebSocket
-      - messages
-      - api
+      - Messages
+      - V1
+  /v1/groups:
+    post:
+      consumes:
+      - application/json
+      description: Создает новую группу с указанным именем для авторизованного пользователя
+      parameters:
+      - description: Данные для создания группы
+        in: body
+        name: createGroupRequest
+        required: true
+        schema:
+          $ref: '#/definitions/api.createGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Группа успешно создана
+          schema:
+            $ref: '#/definitions/api.groupResponse'
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+        "401":
+          description: Пользователь не авторизован
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+        "500":
+          description: Ошибка при создании группы
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: Создание группы
+      tags:
+      - groups
       - v1
+  /v1/groups/{group_id}:
+    delete:
+      description: Удаляет группу по её идентификатору, если пользователь является
+        её владельцем
+      parameters:
+      - description: ID группы для удаления
+        in: path
+        name: group_id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Группа успешно удалена
+          schema:
+            $ref: '#/definitions/api.successResponse'
+        "400":
+          description: Неверный идентификатор группы
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+        "401":
+          description: Пользователь не авторизован
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+        "500":
+          description: Ошибка при удалении группы
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: Удаление группы
+      tags:
+      - Groups
+      - V1
+  /v1/groups/{group_id}/user:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет указанного пользователя из группы, если действие выполняет
+        владелец или администратор группы
+      parameters:
+      - description: ID группы
+        in: path
+        name: group_id
+        required: true
+        type: string
+      - description: ID пользователя для удаления из группы
+        in: body
+        name: userGroupRequest
+        required: true
+        schema:
+          $ref: '#/definitions/api.userGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Пользователь успешно удалён из группы
+          schema:
+            $ref: '#/definitions/api.successResponse'
+        "400":
+          description: Неверный запрос или неверный ID группы
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+        "401":
+          description: Пользователь не авторизован
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+        "500":
+          description: Ошибка при удалении пользователя из группы
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: Удаление пользователя из группы
+      tags:
+      - Groups
+      - V1
+    post:
+      consumes:
+      - application/json
+      description: Добавляет пользователя в группу по идентификатору группы
+      parameters:
+      - description: ID группы
+        in: path
+        name: group_id
+        required: true
+        type: string
+      - description: Данные для добавления пользователя
+        in: body
+        name: addUserToGroupRequest
+        required: true
+        schema:
+          $ref: '#/definitions/api.userGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Пользователь успешно добавлен в группу
+          schema:
+            $ref: '#/definitions/api.successResponse'
+        "400":
+          description: Неверный запрос или неверный ID группы
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+        "401":
+          description: Пользователь не авторизован
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+        "500":
+          description: Ошибка при добавлении пользователя в группу
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: Добавление пользователя в группу
+      tags:
+      - Groups
+      - V1
 securityDefinitions:
   BearerAuth:
     in: cookie

@@ -24,7 +24,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/auth/login": {
+        "/v1/auth/login": {
             "post": {
                 "description": "Log in a user and return a JWT token",
                 "consumes": [
@@ -34,9 +34,8 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "auth",
-                    "api",
-                    "v1"
+                    "Auth",
+                    "V1"
                 ],
                 "summary": "Log in a user",
                 "parameters": [
@@ -72,7 +71,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/auth/register": {
+        "/v1/auth/register": {
             "post": {
                 "description": "Register a new user with username, email, and password",
                 "consumes": [
@@ -82,9 +81,8 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "auth",
-                    "api",
-                    "v1"
+                    "Auth",
+                    "V1"
                 ],
                 "summary": "Register a new user",
                 "parameters": [
@@ -126,7 +124,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/chats": {
+        "/v1/chats": {
             "get": {
                 "security": [
                     {
@@ -138,9 +136,8 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "chats",
-                    "api",
-                    "v1"
+                    "Chats",
+                    "V1"
                 ],
                 "summary": "Get all chats for the authenticated user",
                 "responses": {
@@ -178,7 +175,8 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "chats"
+                    "Chats",
+                    "V1"
                 ],
                 "summary": "Создание нового чата",
                 "parameters": [
@@ -214,7 +212,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/chats/{chat_id}/messages": {
+        "/v1/chats/{chat_id}/messages": {
             "get": {
                 "security": [
                     {
@@ -226,9 +224,8 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "messages",
-                    "api",
-                    "v1"
+                    "Messages",
+                    "V1"
                 ],
                 "summary": "Получение сообщений чата",
                 "parameters": [
@@ -262,7 +259,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/chats/{chat_id}/ws": {
+        "/v1/chats/{chat_id}/ws": {
             "get": {
                 "security": [
                     {
@@ -275,9 +272,8 @@ const docTemplate = `{
                 ],
                 "tags": [
                     "WebSocket",
-                    "messages",
-                    "api",
-                    "v1"
+                    "Messages",
+                    "V1"
                 ],
                 "summary": "Подключение к WebSocket для чата",
                 "parameters": [
@@ -316,22 +312,245 @@ const docTemplate = `{
                     }
                 }
             }
-        }
-    },
-    "definitions": {
-        "api.chatMemberResponse": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "description": "Идентификатор пользователя",
-                    "type": "integer"
-                },
-                "username": {
-                    "description": "Имя пользователя",
-                    "type": "string"
+        },
+        "/v1/groups": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Создает новую группу с указанным именем для авторизованного пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "groups",
+                    "v1"
+                ],
+                "summary": "Создание группы",
+                "parameters": [
+                    {
+                        "description": "Данные для создания группы",
+                        "name": "createGroupRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.createGroupRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Группа успешно создана",
+                        "schema": {
+                            "$ref": "#/definitions/api.groupResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный запрос",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Пользователь не авторизован",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка при создании группы",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    }
                 }
             }
         },
+        "/v1/groups/{group_id}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Удаляет группу по её идентификатору, если пользователь является её владельцем",
+                "tags": [
+                    "Groups",
+                    "V1"
+                ],
+                "summary": "Удаление группы",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID группы для удаления",
+                        "name": "group_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Группа успешно удалена",
+                        "schema": {
+                            "$ref": "#/definitions/api.successResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный идентификатор группы",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Пользователь не авторизован",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка при удалении группы",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/groups/{group_id}/user": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Добавляет пользователя в группу по идентификатору группы",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Groups",
+                    "V1"
+                ],
+                "summary": "Добавление пользователя в группу",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID группы",
+                        "name": "group_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Данные для добавления пользователя",
+                        "name": "addUserToGroupRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.userGroupRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Пользователь успешно добавлен в группу",
+                        "schema": {
+                            "$ref": "#/definitions/api.successResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный запрос или неверный ID группы",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Пользователь не авторизован",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка при добавлении пользователя в группу",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Удаляет указанного пользователя из группы, если действие выполняет владелец или администратор группы",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Groups",
+                    "V1"
+                ],
+                "summary": "Удаление пользователя из группы",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID группы",
+                        "name": "group_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "ID пользователя для удаления из группы",
+                        "name": "userGroupRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.userGroupRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Пользователь успешно удалён из группы",
+                        "schema": {
+                            "$ref": "#/definitions/api.successResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный запрос или неверный ID группы",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Пользователь не авторизован",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка при удалении пользователя из группы",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
         "api.chatResponse": {
             "type": "object",
             "properties": {
@@ -347,7 +566,7 @@ const docTemplate = `{
                     "description": "Список участников чата",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/api.chatMemberResponse"
+                        "$ref": "#/definitions/api.memberResponse"
                     }
                 },
                 "messages": {
@@ -391,10 +610,39 @@ const docTemplate = `{
                 }
             }
         },
+        "api.createGroupRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "description": "Название группы",
+                    "type": "string"
+                }
+            }
+        },
         "api.errorResponse": {
             "type": "object",
             "properties": {
                 "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.groupResponse": {
+            "type": "object",
+            "properties": {
+                "isOwner": {
+                    "type": "boolean"
+                },
+                "members": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.memberResponse"
+                    }
+                },
+                "name": {
                     "type": "string"
                 }
             }
@@ -409,6 +657,19 @@ const docTemplate = `{
                 "password": {
                     "description": "Пароль пользователя",
                     "type": "string"
+                },
+                "username": {
+                    "description": "Имя пользователя",
+                    "type": "string"
+                }
+            }
+        },
+        "api.memberResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Идентификатор пользователя",
+                    "type": "integer"
                 },
                 "username": {
                     "description": "Имя пользователя",
@@ -484,6 +745,14 @@ const docTemplate = `{
             "properties": {
                 "message": {
                     "type": "string"
+                }
+            }
+        },
+        "api.userGroupRequest": {
+            "type": "object",
+            "properties": {
+                "userID": {
+                    "type": "integer"
                 }
             }
         }

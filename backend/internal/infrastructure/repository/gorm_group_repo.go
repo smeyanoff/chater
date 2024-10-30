@@ -46,11 +46,13 @@ func (r *gormGroupRepository) FindGroupByID(ctx context.Context, groupID uint) (
 func (r *gormGroupRepository) FindGroupByName(ctx context.Context, groupName string) (*models.Group, error) {
 	var group models.Group
 
-	if err := r.db.WithContext(ctx).Preload("GroupUsers").
+	// Выполняем запрос с проверкой по имени группы
+	if err := r.db.WithContext(ctx).
 		Preload("GroupUsers").
-		Where("name = ?", groupName).Error; err != nil {
+		Where("name = ?", groupName).
+		First(&group).Error; err != nil { // Добавляем вызов First для выполнения запроса
 		if err == gorm.ErrRecordNotFound {
-			return nil, errors.New("group not found")
+			return nil, nil // Возвращаем nil вместо ошибки, если группа не найдена
 		}
 		return nil, err
 	}

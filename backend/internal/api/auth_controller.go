@@ -21,7 +21,7 @@ func NewAuthController(authService *service.AuthService) *AuthController {
 // Register godoc
 // @Summary Register a new user
 // @Description Register a new user with username, email, and password
-// @Tags auth, v1
+// @Tags Auth, V1
 // @Accept json
 // @Produce json
 // @Param user body registerRequest true "User Data"
@@ -59,7 +59,7 @@ func (h *AuthController) Register(c *gin.Context) {
 // Login godoc
 // @Summary Log in a user
 // @Description Log in a user and return a JWT token
-// @Tags auth, v1
+// @Tags Auth, V1
 // @Accept json
 // @Produce json
 // @Param credentials body loginRequest true "User Credentials"
