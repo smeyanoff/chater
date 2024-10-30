@@ -9,5 +9,5 @@ setup: docker-compose.yaml .swag
 submit:
 	git add .
 	message=$(git diff --name-only --cached | sed ':a;N;$!ba;s/\n/, /g')
-	git commit -m "Изменены файлы: $message"
+	git commit -m "Изменены файлы: $(message)"
 
