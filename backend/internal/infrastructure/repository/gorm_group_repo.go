@@ -94,6 +94,7 @@ func (r *gormGroupRepository) CheckUserIsAdmin(ctx context.Context, userID uint)
 
 	// Присоединяем таблицу пользователей и проверяем, состоит ли пользователь с указанным userID в группе "admins"
 	err := r.db.WithContext(ctx).
+		Preload("GroupUsers").
 		Joins("JOIN group_users ON group_users.group_id = groups.id AND group_users.user_id = ?", userID).
 		Where("groups.name = ?", "admins").
 		First(&group).Error

@@ -21,7 +21,7 @@ func NewGroupController(groupService *service.GroupService) *GroupController {
 // CreateGroup создает новую группу
 // @Summary Создание группы
 // @Description Создает новую группу с указанным именем для авторизованного пользователя
-// @Tags groups, v1
+// @Tags Groups, v1
 // @Accept json
 // @Produce json
 // @Param createGroupRequest body createGroupRequest true "Данные для создания группы"
@@ -92,6 +92,7 @@ func (gc *GroupController) DeleteGroup(ctx *gin.Context) {
 		logging.Logger.Error(err.Error())
 		ctx.JSON(http.StatusInternalServerError,
 			errorResponse{Error: fmt.Sprintf("Error delete group: %s", err.Error())})
+		return
 	}
 
 	ctx.JSON(http.StatusOK, successResponse{Message: "Group deleted successfully"})

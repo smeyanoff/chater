@@ -37,7 +37,7 @@ func (cc *ChatService) checkRights(ctx context.Context, ownerID uint, userID uin
 		return err
 	}
 	// Если пользователь владелец группы или администратор
-	if ownerID == userID || !isUserAdmin {
+	if ownerID != userID && !isUserAdmin {
 		return errors.New("only chat owner and admin can do this")
 	}
 

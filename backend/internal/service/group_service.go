@@ -26,7 +26,7 @@ func (gc *GroupService) checkRights(ctx context.Context, ownerID uint, userID ui
 		return err
 	}
 	// Если пользователь владелец группы или администратор
-	if ownerID == userID || !isUserAdmin {
+	if ownerID != userID && !isUserAdmin {
 		return errors.New("only group owner and admin can do this")
 	}
 

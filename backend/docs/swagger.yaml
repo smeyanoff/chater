@@ -379,7 +379,7 @@ paths:
       - BearerAuth: []
       summary: Создание группы
       tags:
-      - groups
+      - Groups
       - v1
   /v1/groups/{group_id}:
     delete:

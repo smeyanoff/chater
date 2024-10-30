@@ -328,7 +328,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "groups",
+                    "Groups",
                     "v1"
                 ],
                 "summary": "Создание группы",
