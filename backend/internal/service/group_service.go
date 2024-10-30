@@ -101,6 +101,12 @@ func (gc *GroupService) AddUserToGroup(ctx context.Context, ownerID uint, userTo
 		return err
 	}
 
+	for _, user := range group.GroupUsers {
+		if user.ID == userToAdd.ID {
+			return errors.New("user is already in group")
+		}
+	}
+
 	if err := gc.checkRights(ctx, group.OwnerID, ownerID); err != nil {
 		return err
 	}
@@ -121,6 +127,10 @@ func (gc *GroupService) DeleteUserFromGroup(ctx context.Context, ownerID uint, u
 	userToRemove, err := gc.userRepo.FindUserByID(ctx, userToRemoveID)
 	if err != nil {
 		return err
+	}
+
+	if group.OwnerID == userToRemove.ID {
+		return errors.New("group owner self remove forbidden")
 	}
 
 	if err := gc.checkRights(ctx, group.OwnerID, ownerID); err != nil {

@@ -1,6 +1,7 @@
 package api
 
 type groupResponse struct {
+	ID      uint             `json:"id"`
 	Name    string           `json:"name"`
 	IsOwner bool             `json:"isOwner"`
 	Members []memberResponse `json:"members"`

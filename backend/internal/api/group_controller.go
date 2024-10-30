@@ -112,7 +112,7 @@ func (gc *GroupController) DeleteGroup(ctx *gin.Context) {
 // @Failure 401 {object} errorResponse "Пользователь не авторизован"
 // @Failure 500 {object} errorResponse "Ошибка при добавлении пользователя в группу"
 // @Security BearerAuth
-// @Router /v1/groups/{group_id}/user [post]
+// @Router /v1/groups/{group_id}/users [post]
 func (gc *GroupController) AddUserToGroup(ctx *gin.Context) {
 
 	groupID := ctx.Param("group_id")
@@ -163,7 +163,7 @@ func (gc *GroupController) AddUserToGroup(ctx *gin.Context) {
 // @Failure 401 {object} errorResponse "Пользователь не авторизован"
 // @Failure 500 {object} errorResponse "Ошибка при удалении пользователя из группы"
 // @Security BearerAuth
-// @Router /v1/groups/{group_id}/user [delete]
+// @Router /v1/groups/{group_id}/users [delete]
 func (gc *GroupController) DeleteUserFromGroup(ctx *gin.Context) {
 
 	groupID := ctx.Param("group_id")

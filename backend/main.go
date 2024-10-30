@@ -113,8 +113,8 @@ func main() {
 
 	apiV1.POST("/groups", groupController.CreateGroup)
 	apiV1.DELETE("/groups/:group_id", groupController.DeleteGroup)
-	apiV1.POST("/groups/:group_id/user", groupController.AddUserToGroup)
-	apiV1.DELETE("/groups/:group_id/user", groupController.DeleteUserFromGroup)
+	apiV1.POST("/groups/:group_id/users", groupController.AddUserToGroup)
+	apiV1.DELETE("/groups/:group_id/users", groupController.DeleteUserFromGroup)
 
 	// Запуск HTTP-сервера
 	log.Printf("Server is running on port %s", cfg.App.Port)

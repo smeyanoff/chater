@@ -26,5 +26,5 @@ type createGroupRequest struct {
 }
 
 type userGroupRequest struct {
-	UserID uint `json:"userID" binding:"requered"`
+	UserID uint `json:"user_id" binding:"required"`
 }

@@ -421,7 +421,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/groups/{group_id}/user": {
+        "/v1/groups/{group_id}/users": {
             "post": {
                 "security": [
                     {
@@ -633,6 +633,9 @@ const docTemplate = `{
         "api.groupResponse": {
             "type": "object",
             "properties": {
+                "id": {
+                    "type": "integer"
+                },
                 "isOwner": {
                     "type": "boolean"
                 },
@@ -750,8 +753,11 @@ const docTemplate = `{
         },
         "api.userGroupRequest": {
             "type": "object",
+            "required": [
+                "user_id"
+            ],
             "properties": {
-                "userID": {
+                "user_id": {
                     "type": "integer"
                 }
             }

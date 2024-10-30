@@ -415,7 +415,7 @@
                 }
             }
         },
-        "/v1/groups/{group_id}/user": {
+        "/v1/groups/{group_id}/users": {
             "post": {
                 "security": [
                     {
@@ -627,6 +627,9 @@
         "api.groupResponse": {
             "type": "object",
             "properties": {
+                "id": {
+                    "type": "integer"
+                },
                 "isOwner": {
                     "type": "boolean"
                 },
@@ -744,8 +747,11 @@
         },
         "api.userGroupRequest": {
             "type": "object",
+            "required": [
+                "user_id"
+            ],
             "properties": {
-                "userID": {
+                "user_id": {
                     "type": "integer"
                 }
             }
