@@ -1,5 +1,9 @@
 package api
 
+type groupsResponse struct {
+	Groups []groupResponse `json:"groups"`
+}
+
 type groupResponse struct {
 	ID      uint             `json:"id"`
 	Name    string           `json:"name"`
@@ -16,12 +20,10 @@ type chatsResponse struct {
 }
 
 type chatResponse struct {
-	ID        uint              `json:"id"`        // Идентификатор чата
-	Name      string            `json:"name"`      // Название чата
-	CreatedAt string            `json:"createdAt"` // Время создания чата
-	UpdatedAt string            `json:"updatedAt"` // Время последнего обновления чата
-	Members   []memberResponse  `json:"members"`   // Список участников чата
-	Messages  []messageResponse `json:"messages"`  // Последние сообщения чата
+	ID       uint              `json:"id"`       // Идентификатор чата
+	Name     string            `json:"name"`     // Название чата
+	Members  []memberResponse  `json:"members"`  // Список участников чата
+	Messages []messageResponse `json:"messages"` // Последние сообщения чата
 }
 
 type memberResponse struct {
@@ -31,7 +33,6 @@ type memberResponse struct {
 
 type messageResponse struct {
 	ID        uint   `json:"id"`        // Идентификатор сообщения
-	SenderID  uint   `json:"senderID"`  // Идентификатор отправителя
 	Sender    string `json:"sender"`    // Имя отправителя
 	IsCurrent bool   `json:"isCurrent"` // Сообщение отправлено текущим пользователем
 	Content   string `json:"content"`   // Содержание сообщения

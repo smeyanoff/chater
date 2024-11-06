@@ -35,7 +35,6 @@ func mapMessage(message *entities.Message, userID uint) messageResponse {
 
 	return messageResponse{
 		ID:        message.ID,
-		SenderID:  message.SenderID,
 		Sender:    message.Sender.Username,
 		IsCurrent: isCurrentUser,
 		Content:   message.Content,
@@ -54,13 +53,19 @@ func mapChats(chats []*entities.Chat, userID uint) []chatResponse {
 
 func mapChat(chat *entities.Chat, userID uint) chatResponse {
 	return chatResponse{
-		ID:        chat.ID,
-		Name:      chat.Name.String(),
-		CreatedAt: chat.CreatedAt.Format(time.RFC3339),
-		UpdatedAt: chat.UpdatedAt.Format(time.RFC3339),
-		Members:   mapMembers(chat.ChatUsers),
-		Messages:  mapMessages(chat.Messages, userID),
+		ID:       chat.ID,
+		Name:     chat.Name.String(),
+		Members:  mapMembers(chat.ChatUsers),
+		Messages: mapMessages(chat.Messages, userID),
 	}
+}
+
+func mapGroups(groups []*entities.Group, userID uint) []groupResponse {
+	var response []groupResponse
+	for _, group := range groups {
+		response = append(response, mapGroup(group, userID))
+	}
+	return response
 }
 
 func mapGroup(group *entities.Group, userID uint) groupResponse {

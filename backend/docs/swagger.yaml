@@ -2,9 +2,6 @@ basePath: /
 definitions:
   api.chatResponse:
     properties:
-      createdAt:
-        description: Время создания чата
-        type: string
       id:
         description: Идентификатор чата
         type: integer
@@ -20,9 +17,6 @@ definitions:
         type: array
       name:
         description: Название чата
-        type: string
-      updatedAt:
-        description: Время последнего обновления чата
         type: string
     type: object
   api.chatsResponse:
@@ -67,6 +61,13 @@ definitions:
       name:
         type: string
     type: object
+  api.groupsResponse:
+    properties:
+      groups:
+        items:
+          $ref: '#/definitions/api.groupResponse'
+        type: array
+    type: object
   api.loginRequest:
     properties:
       password:
@@ -105,9 +106,6 @@ definitions:
       sender:
         description: Имя отправителя
         type: string
-      senderID:
-        description: Идентификатор отправителя
-        type: integer
     type: object
   api.messagesResponse:
     properties:
@@ -140,10 +138,11 @@ definitions:
     type: object
   api.userGroupRequest:
     properties:
-      user_id:
+      userID:
+        description: ID пользователя
         type: integer
     required:
-    - user_id
+    - userID
     type: object
 host: localhost:54321
 info:
@@ -349,6 +348,29 @@ paths:
       - Messages
       - V1
   /v1/groups:
+    get:
+      description: Возвращает список всех групп, в которых состоит текущий авторизованный
+        пользователь
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список групп пользователя
+          schema:
+            $ref: '#/definitions/api.groupsResponse'
+        "401":
+          description: Пользователь не авторизован
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+        "500":
+          description: Ошибка сервера
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: Получить все группы пользователя
+      tags:
+      - Groups
     post:
       consumes:
       - application/json
@@ -384,7 +406,7 @@ paths:
       summary: Создание группы
       tags:
       - Groups
-      - v1
+      - V1
   /v1/groups/{group_id}:
     delete:
       description: Удаляет группу по её идентификатору, если пользователь является

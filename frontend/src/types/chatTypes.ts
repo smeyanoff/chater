@@ -1,8 +1,4 @@
-// Интерфейс для участника чата
-export interface ChatMember {
-  id: number;
-  username: string;
-}
+import { User } from './userTypes'
 
 // Интерфейс для сообщений
 export interface ChatMessage {
@@ -10,7 +6,6 @@ export interface ChatMessage {
   content: string;
   createdAt: string;
   sender: string;
-  senderID: number;
   isCurrent: boolean;
 }
 
@@ -18,8 +13,6 @@ export interface ChatMessage {
 export interface Chat {
   id: number;
   name: string;
-  createdAt: string;
-  updatedAt: string;
-  members: ChatMember[];
+  members: User[];
   messages: ChatMessage[];
 }

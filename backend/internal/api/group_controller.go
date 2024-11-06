@@ -21,7 +21,7 @@ func NewGroupController(groupService *service.GroupService) *GroupController {
 // CreateGroup создает новую группу
 // @Summary Создание группы
 // @Description Создает новую группу с указанным именем для авторизованного пользователя
-// @Tags Groups, v1
+// @Tags Groups, V1
 // @Accept json
 // @Produce json
 // @Param createGroupRequest body createGroupRequest true "Данные для создания группы"
@@ -135,7 +135,7 @@ func (gc *GroupController) AddUserToGroup(ctx *gin.Context) {
 
 	ownerID, exists := ctx.Get("user_id")
 	if !exists {
-		logging.Logger.Error("UserID doesn't exist")
+		logging.Logger.Error(ErrUnauthorized)
 		ctx.JSON(http.StatusUnauthorized, errorResponse{Error: ErrUnauthorized})
 		return
 	}
@@ -186,7 +186,7 @@ func (gc *GroupController) DeleteUserFromGroup(ctx *gin.Context) {
 
 	ownerID, exists := ctx.Get("user_id")
 	if !exists {
-		logging.Logger.Error("UserID doesn't exist")
+		logging.Logger.Error(ErrUnauthorized)
 		ctx.JSON(http.StatusUnauthorized, errorResponse{Error: ErrUnauthorized})
 		return
 	}
@@ -199,4 +199,32 @@ func (gc *GroupController) DeleteUserFromGroup(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, successResponse{Message: "User deleted from group"})
 	logging.Logger.Debug("User deleted successfully")
+}
+
+// GetAllUserGroups godoc
+// @Summary Получить все группы пользователя
+// @Description Возвращает список всех групп, в которых состоит текущий авторизованный пользователь
+// @Tags Groups
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} groupsResponse "Список групп пользователя"
+// @Failure 401 {object} errorResponse "Пользователь не авторизован"
+// @Failure 500 {object} errorResponse "Ошибка сервера"
+// @Router /v1/groups [get]
+func (gc *GroupController) GetAllUserGroups(ctx *gin.Context) {
+	logging.Logger.Debug("Get all user group response...")
+	userID, exists := ctx.Get("user_id")
+	if !exists {
+		logging.Logger.Error(ErrUnauthorized)
+		ctx.JSON(http.StatusUnauthorized, errorResponse{Error: ErrUnauthorized})
+		return
+	}
+
+	groups, err := gc.groupService.GetAllUserGroups(ctx, userID.(uint))
+	if err != nil {
+		logging.Logger.Error(fmt.Sprintf("Error get user groups: %s", err.Error()))
+		ctx.JSON(http.StatusInternalServerError, fmt.Sprintf("Error get user groups: %s", err.Error()))
+	}
+
+	ctx.JSON(http.StatusOK, groupsResponse{Groups: mapGroups(groups, userID.(uint))})
 }

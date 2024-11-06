@@ -16,7 +16,6 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	_ "chater/docs"
-	_ "chater/internal/domain/entity"
 	_ "chater/internal/domain/valueobject"
 
 	"log"
@@ -112,6 +111,7 @@ func main() {
 	// groups
 
 	apiV1.POST("/groups", groupController.CreateGroup)
+	apiV1.GET("/groups", groupController.GetAllUserGroups)
 	apiV1.DELETE("/groups/:group_id", groupController.DeleteGroup)
 	apiV1.POST("/groups/:group_id/users", groupController.AddUserToGroup)
 	apiV1.DELETE("/groups/:group_id/users", groupController.DeleteUserFromGroup)

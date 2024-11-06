@@ -13,6 +13,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 type AuthService struct {
@@ -63,7 +64,13 @@ func (s *AuthService) Register(ctx context.Context, username, email, password st
 	}
 
 	if existedUser != nil {
-		return errors.New("user email already exists")
+		return errors.New("user with this email already exists")
+	}
+
+	if user, err := s.userRepo.FindByUsername(ctx, username); err != nil && err != gorm.ErrRecordNotFound {
+		return err
+	} else if (user != &models.User{}) {
+		return errors.New("user with this login already exists")
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)

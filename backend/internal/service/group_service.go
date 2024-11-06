@@ -119,6 +119,10 @@ func (gc *GroupService) AddUserToGroup(ctx context.Context, ownerID uint, userTo
 }
 
 func (gc *GroupService) DeleteUserFromGroup(ctx context.Context, ownerID uint, userToRemoveID uint, groupID uint) error {
+	if ownerID == userToRemoveID {
+		return errors.New("group owner self remove forbidden")
+	}
+
 	group, err := gc.groupRepo.FindGroupByID(ctx, groupID)
 	if err != nil {
 		return err
@@ -127,10 +131,6 @@ func (gc *GroupService) DeleteUserFromGroup(ctx context.Context, ownerID uint, u
 	userToRemove, err := gc.userRepo.FindUserByID(ctx, userToRemoveID)
 	if err != nil {
 		return err
-	}
-
-	if group.OwnerID == userToRemove.ID {
-		return errors.New("group owner self remove forbidden")
 	}
 
 	if err := gc.checkRights(ctx, group.OwnerID, ownerID); err != nil {
@@ -142,4 +142,14 @@ func (gc *GroupService) DeleteUserFromGroup(ctx context.Context, ownerID uint, u
 	}
 
 	return nil
+}
+
+func (gc *GroupService) GetAllUserGroups(ctx context.Context, userID uint) ([]*models.Group, error) {
+
+	groups, err := gc.groupRepo.FindAllUserGroups(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	return groups, nil
+
 }

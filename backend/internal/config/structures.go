@@ -8,10 +8,11 @@ type Config struct {
 }
 
 type AppConfig struct {
-	Port  string
-	Host  string
-	Admin string
-	Pwd   string
+	Port       string
+	Host       string
+	AdminLogin string
+	AdminEmail string
+	AdminPwd   string
 }
 
 type DatabaseConfig struct {

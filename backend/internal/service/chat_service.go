@@ -147,7 +147,7 @@ func (cc *ChatService) AddUserToChat(ctx context.Context, userToAddID uint, chat
 func (cc *ChatService) DeleteUserFromChat(ctx context.Context, ownerID uint, userToRemoveID uint, chatID uint) error {
 
 	if ownerID == userToRemoveID {
-		return errors.New("chat owners can't self remove from chat")
+		return errors.New("chat owner self remove forbidden")
 	}
 
 	user, err := cc.userRepo.FindUserByID(ctx, userToRemoveID)

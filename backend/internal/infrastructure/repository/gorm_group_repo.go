@@ -65,6 +65,7 @@ func (r *gormGroupRepository) FindAllUserGroups(ctx context.Context, userID uint
 	var groups []*models.Group
 
 	err := r.db.WithContext(ctx).
+		Table("groups").
 		Joins("JOIN group_users ON group_users.group_id = groups.id").
 		Preload("GroupUsers").
 		Where("group_users.user_id = ?", userID).

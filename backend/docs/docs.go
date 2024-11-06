@@ -314,6 +314,41 @@ const docTemplate = `{
             }
         },
         "/v1/groups": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает список всех групп, в которых состоит текущий авторизованный пользователь",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Groups"
+                ],
+                "summary": "Получить все группы пользователя",
+                "responses": {
+                    "200": {
+                        "description": "Список групп пользователя",
+                        "schema": {
+                            "$ref": "#/definitions/api.groupsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Пользователь не авторизован",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -329,7 +364,7 @@ const docTemplate = `{
                 ],
                 "tags": [
                     "Groups",
-                    "v1"
+                    "V1"
                 ],
                 "summary": "Создание группы",
                 "parameters": [
@@ -554,10 +589,6 @@ const docTemplate = `{
         "api.chatResponse": {
             "type": "object",
             "properties": {
-                "createdAt": {
-                    "description": "Время создания чата",
-                    "type": "string"
-                },
                 "id": {
                     "description": "Идентификатор чата",
                     "type": "integer"
@@ -578,10 +609,6 @@ const docTemplate = `{
                 },
                 "name": {
                     "description": "Название чата",
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "description": "Время последнего обновления чата",
                     "type": "string"
                 }
             }
@@ -650,6 +677,17 @@ const docTemplate = `{
                 }
             }
         },
+        "api.groupsResponse": {
+            "type": "object",
+            "properties": {
+                "groups": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.groupResponse"
+                    }
+                }
+            }
+        },
         "api.loginRequest": {
             "type": "object",
             "required": [
@@ -702,10 +740,6 @@ const docTemplate = `{
                 "sender": {
                     "description": "Имя отправителя",
                     "type": "string"
-                },
-                "senderID": {
-                    "description": "Идентификатор отправителя",
-                    "type": "integer"
                 }
             }
         },
@@ -754,10 +788,11 @@ const docTemplate = `{
         "api.userGroupRequest": {
             "type": "object",
             "required": [
-                "user_id"
+                "userID"
             ],
             "properties": {
-                "user_id": {
+                "userID": {
+                    "description": "ID пользователя",
                     "type": "integer"
                 }
             }

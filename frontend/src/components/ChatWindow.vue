@@ -150,7 +150,7 @@ export default defineComponent({
           // Открываем новое соединение
           try {
             console.log('Opening new WebSocket connection...')
-            await webSocketClient.connect(`ws://localhost:54321/api/v1/chats/${newChat.id}/messages/ws`)
+            await webSocketClient.connect(`ws://localhost:54321/v1/chats/${newChat.id}/messages/ws`)
 
             if (webSocketClient.isConnected()) {
               // Подписываемся на получение сообщений

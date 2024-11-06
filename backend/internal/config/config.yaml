@@ -1,8 +1,9 @@
 app:
   port: "8080"
   host: "localhost"
-  admin: "admin"
-  pwd: "admin123"
+  adminlogin: "admin"
+  adminemail: "admin@admin.com"
+  adminpwd: "admin123"
 
 db:
   port: 5432
