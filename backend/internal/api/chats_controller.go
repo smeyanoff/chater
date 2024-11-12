@@ -79,12 +79,14 @@ func (cc *ChatController) CreateChat(ctx *gin.Context) {
 
 	ownerID, exists := ctx.Get("user_id") // Получаем ID пользователя (например, из JWT)
 	if !exists {
+		logging.Logger.Error(fmt.Sprintf("Create chat error: %s", ErrUnauthorized))
 		ctx.JSON(http.StatusUnauthorized, errorResponse{Error: ErrUnauthorized})
 		return
 	}
 
 	chat, err := cc.chatService.CreateChat(ctx, request.Name, ownerID.(uint))
 	if err != nil {
+		logging.Logger.Error(fmt.Sprintf("Create chat error: %s", err.Error()))
 		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: "Failed to create chat"})
 		return
 	}

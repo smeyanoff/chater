@@ -20,7 +20,7 @@ apiClient.interceptors.response.use(
       // Перенаправляем на страницу авторизации
       router.push('/auth')
     }
-    return Promise.reject(new Error('Unauthorized')) // Возвращаем ошибку для дальнейшей обработки
+    return Promise.reject(new Error(error.error)) // Возвращаем ошибку для дальнейшей обработки
   }
 )
 

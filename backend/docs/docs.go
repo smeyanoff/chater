@@ -709,6 +709,9 @@ const docTemplate = `{
                 "name"
             ],
             "properties": {
+                "groupID": {
+                    "type": "integer"
+                },
                 "name": {
                     "description": "Название группы",
                     "type": "string"

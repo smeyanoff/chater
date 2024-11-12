@@ -42,6 +42,8 @@ definitions:
     type: object
   api.createGroupRequest:
     properties:
+      groupID:
+        type: integer
       name:
         description: Название группы
         type: string
