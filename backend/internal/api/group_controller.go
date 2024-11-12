@@ -106,7 +106,7 @@ func (gc *GroupController) DeleteGroup(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param group_id path string true "ID группы"
-// @Param addUserToGroupRequest body userGroupRequest true "Данные для добавления пользователя"
+// @Param addUserToGroupRequest body userAddToGroupRequest true "Данные для добавления пользователя"
 // @Success 200 {object} successResponse "Пользователь успешно добавлен в группу"
 // @Failure 400 {object} errorResponse "Неверный запрос или неверный ID группы"
 // @Failure 401 {object} errorResponse "Пользователь не авторизован"
@@ -118,7 +118,7 @@ func (gc *GroupController) AddUserToGroup(ctx *gin.Context) {
 	groupID := ctx.Param("group_id")
 	logging.Logger.Debug(fmt.Sprintf("Add user %s group request...", groupID))
 
-	var request userGroupRequest
+	var request userAddToGroupRequest
 	if err := ctx.ShouldBindJSON(&request); err != nil {
 		logging.Logger.Error(err.Error())
 		logging.Logger.Sugar().Debug(request)
@@ -157,7 +157,7 @@ func (gc *GroupController) AddUserToGroup(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param group_id path string true "ID группы"
-// @Param userGroupRequest body userGroupRequest true "ID пользователя для удаления из группы"
+// @Param userGroupRequest body userAddToGroupRequest true "ID пользователя для удаления из группы"
 // @Success 200 {object} successResponse "Пользователь успешно удалён из группы"
 // @Failure 400 {object} errorResponse "Неверный запрос или неверный ID группы"
 // @Failure 401 {object} errorResponse "Пользователь не авторизован"
@@ -169,7 +169,7 @@ func (gc *GroupController) DeleteUserFromGroup(ctx *gin.Context) {
 	groupID := ctx.Param("group_id")
 	logging.Logger.Debug(fmt.Sprintf("Delete user from group %s request...", groupID))
 
-	var request userGroupRequest
+	var request userAddToGroupRequest
 	if err := ctx.ShouldBindJSON(&request); err != nil {
 		logging.Logger.Error(err.Error())
 		logging.Logger.Sugar().Debug(request)

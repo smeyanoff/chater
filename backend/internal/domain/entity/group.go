@@ -12,4 +12,5 @@ type Group struct {
 	OwnerID    uint                  `gorm:"not null; index"`
 	GroupOwner *User                 `gorm:"foreignKey:OwnerID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	GroupUsers []*User               `gorm:"many2many:group_users;"`
+	InChats    []*Chat               `gorm:"many2many:chat_groups;"`
 }

@@ -7,12 +7,12 @@ export interface UserGroupRequest {
     userID: number;
   }
 
-export const getAllUserGroups = async (): Promise<GroupsResponse> => {
+export const getAllUserGroups = async (): Promise<Group[]> => {
   try {
     const { data } = await apiClient.get<GroupsResponse>('/v1/groups', {
       withCredentials: true // Включаем отправку cookie
     })
-    return data
+    return data.groups
   } catch (error) {
     return Promise.reject(new Error(
             `Ошибка получения групп: ${error instanceof Error ? error.message : error}`

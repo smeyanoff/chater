@@ -5,6 +5,7 @@ import (
 	"chater/internal/service"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -89,4 +90,44 @@ func (cc *ChatController) CreateChat(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, mapChat(chat, ownerID.(uint)))
+}
+
+// AddGroupToChat godoc
+// @Summary Add a group to a chat
+// @Description Adds a specified group to a chat, requires the user to be authorized
+// @Tags Chats, V1
+// @Param chat_id path int true "Chat ID"
+// @Param group body groupAddToChatRequest true "Group to be added to chat"
+// @Security BearerAuth
+// @Success 200 {object} successResponse
+// @Failure 400 {object} errorResponse "Invalid Chat ID or Request Format"
+// @Failure 401 {object} errorResponse "Unauthorized"
+// @Failure 500 {object} errorResponse "Internal Server Error"
+// @Router /v1/chats/{chat_id}/groups [post]
+func (cc *ChatController) AddGroupToChat(ctx *gin.Context) {
+	chatID := ctx.Param("chat_id")
+	chatIDuint, err := strconv.ParseUint(chatID, 10, 32)
+	if err != nil {
+		logging.Logger.Error(err.Error())
+		ctx.JSON(http.StatusBadRequest, errorResponse{Error: "Invalid Chat ID"})
+		return
+	}
+
+	var request groupAddToChatRequest
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse{Error: ErrInvalidRequest})
+		return
+	}
+
+	userID, exists := ctx.Get("user_id") // Получаем ID пользователя (например, из JWT)
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, errorResponse{Error: ErrUnauthorized})
+		return
+	}
+
+	if err := cc.chatService.AddGroupToChat(ctx, userID.(uint), uint(chatIDuint), request.GroupID); err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: err.Error()})
+	}
+
+	ctx.JSON(http.StatusOK, successResponse{Message: "Group added successfully"})
 }

@@ -183,9 +183,63 @@ func (cc *ChatService) DeleteUserFromChat(ctx context.Context, ownerID uint, use
  * - error: an error if the operation fails
  */
 func (cc *ChatService) GetUserChats(ctx context.Context, userID uint) ([]*models.Chat, error) {
-	models, err := cc.chatRepo.FindAllUserChatsWithLastMessage(ctx, userID)
+	chats, err := cc.chatRepo.FindAllChatsWithLastMessage(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
-	return models, nil
+	return chats, nil
+}
+
+func (cc *ChatService) AddGroupToChat(ctx context.Context, userID uint, chatID uint, groupID uint) error {
+
+	chat, err := cc.chatRepo.FindChatByID(ctx, chatID)
+	if err != nil {
+		return err
+	}
+
+	user, err := cc.userRepo.FindUserByID(ctx, userID)
+	if err != nil {
+		return err
+	}
+
+	group, err := cc.groupRepo.FindGroupByID(ctx, groupID)
+	if err != nil {
+		return err
+	}
+
+	if err := cc.checkRights(ctx, chat.OwnerID, user.ID); err != nil {
+		return err
+	}
+
+	if err := cc.chatRepo.AddGroup(ctx, chat, group); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (cc *ChatService) RemoveGroupFromChat(ctx context.Context, userID uint, chatID uint, groupID uint) error {
+
+	chat, err := cc.chatRepo.FindChatByID(ctx, chatID)
+	if err != nil {
+		return err
+	}
+
+	user, err := cc.userRepo.FindUserByID(ctx, userID)
+	if err != nil {
+		return err
+	}
+
+	group, err := cc.groupRepo.FindGroupByID(ctx, groupID)
+	if err != nil {
+		return err
+	}
+
+	if err := cc.checkRights(ctx, chat.OwnerID, user.ID); err != nil {
+		return err
+	}
+
+	if err := cc.chatRepo.RemoveGroup(ctx, chat, group); err != nil {
+		return err
+	}
+	return nil
 }

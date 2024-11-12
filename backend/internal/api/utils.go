@@ -55,6 +55,7 @@ func mapChat(chat *entities.Chat, userID uint) chatResponse {
 	return chatResponse{
 		ID:       chat.ID,
 		Name:     chat.Name.String(),
+		Groups:   mapGroups(chat.ChatGroups, userID),
 		Members:  mapMembers(chat.ChatUsers),
 		Messages: mapMessages(chat.Messages, userID),
 	}
@@ -71,8 +72,8 @@ func mapGroups(groups []*entities.Group, userID uint) []groupResponse {
 func mapGroup(group *entities.Group, userID uint) groupResponse {
 	isOwner := userID == group.OwnerID
 	return groupResponse{
+		ID:      group.ID,
 		Name:    group.Name.String(),
 		IsOwner: isOwner,
-		Members: mapMembers(group.GroupUsers),
 	}
 }

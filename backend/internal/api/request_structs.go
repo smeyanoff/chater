@@ -22,9 +22,14 @@ type createChatRequest struct {
 }
 
 type createGroupRequest struct {
-	Name string `json:"name" binding:"required"` // Название группы
+	Name    string `json:"name" binding:"required"` // Название группы
+	GroupID uint   `json:"groupID"`
 }
 
-type userGroupRequest struct {
+type userAddToGroupRequest struct {
 	UserID uint `json:"userID" binding:"required"` // ID пользователя
+}
+
+type groupAddToChatRequest struct {
+	GroupID uint `json:"groupID" binding:"required"` // ID пользователя
 }

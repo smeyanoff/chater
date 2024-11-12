@@ -5,10 +5,9 @@ type groupsResponse struct {
 }
 
 type groupResponse struct {
-	ID      uint             `json:"id"`
-	Name    string           `json:"name"`
-	IsOwner bool             `json:"isOwner"`
-	Members []memberResponse `json:"members"`
+	ID      uint   `json:"id"`      // ID группы
+	Name    string `json:"name"`    // Имя группы
+	IsOwner bool   `json:"isOwner"` // Является ли пользователь владельцем группы
 }
 
 type messagesResponse struct {
@@ -23,6 +22,7 @@ type chatResponse struct {
 	ID       uint              `json:"id"`       // Идентификатор чата
 	Name     string            `json:"name"`     // Название чата
 	Members  []memberResponse  `json:"members"`  // Список участников чата
+	Groups   []groupResponse   `json:"groups"`   // Список групп
 	Messages []messageResponse `json:"messages"` // Последние сообщения чата
 }
 

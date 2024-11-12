@@ -33,5 +33,6 @@ func (s *MessageService) SendMessage(ctx context.Context, chatID uint, senderID 
 
 // Получение всех сообщений чата
 func (s *MessageService) GetMessages(ctx context.Context, chatID uint) ([]*models.Message, error) {
+
 	return s.messageRepo.GetMessagesByChatID(ctx, chatID)
 }

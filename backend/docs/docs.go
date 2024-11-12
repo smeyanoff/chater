@@ -212,6 +212,65 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/chats/{chat_id}/groups": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Adds a specified group to a chat, requires the user to be authorized",
+                "tags": [
+                    "Chats",
+                    "V1"
+                ],
+                "summary": "Add a group to a chat",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Chat ID",
+                        "name": "chat_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Group to be added to chat",
+                        "name": "group",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.groupAddToChatRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.successResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Chat ID or Request Format",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/chats/{chat_id}/messages": {
             "get": {
                 "security": [
@@ -489,7 +548,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.userGroupRequest"
+                            "$ref": "#/definitions/api.userAddToGroupRequest"
                         }
                     }
                 ],
@@ -552,7 +611,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.userGroupRequest"
+                            "$ref": "#/definitions/api.userAddToGroupRequest"
                         }
                     }
                 ],
@@ -589,6 +648,13 @@ const docTemplate = `{
         "api.chatResponse": {
             "type": "object",
             "properties": {
+                "groups": {
+                    "description": "Список групп",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.groupResponse"
+                    }
+                },
                 "id": {
                     "description": "Идентификатор чата",
                     "type": "integer"
@@ -657,22 +723,31 @@ const docTemplate = `{
                 }
             }
         },
+        "api.groupAddToChatRequest": {
+            "type": "object",
+            "required": [
+                "groupID"
+            ],
+            "properties": {
+                "groupID": {
+                    "description": "ID пользователя",
+                    "type": "integer"
+                }
+            }
+        },
         "api.groupResponse": {
             "type": "object",
             "properties": {
                 "id": {
+                    "description": "ID группы",
                     "type": "integer"
                 },
                 "isOwner": {
+                    "description": "Является ли пользователь владельцем группы",
                     "type": "boolean"
                 },
-                "members": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/api.memberResponse"
-                    }
-                },
                 "name": {
+                    "description": "Имя группы",
                     "type": "string"
                 }
             }
@@ -785,7 +860,7 @@ const docTemplate = `{
                 }
             }
         },
-        "api.userGroupRequest": {
+        "api.userAddToGroupRequest": {
             "type": "object",
             "required": [
                 "userID"

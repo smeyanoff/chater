@@ -102,6 +102,7 @@ func main() {
 
 	apiV1.GET("/chats", chatController.GetChatsForUser)
 	apiV1.POST("/chats", chatController.CreateChat)
+	apiV1.POST("/chats/:chat_id/groups", chatController.AddGroupToChat)
 
 	// messages
 
