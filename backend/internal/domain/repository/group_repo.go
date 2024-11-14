@@ -13,6 +13,7 @@ type GroupRepository interface {
 	FindGroupByName(ctx context.Context, groupName string) (*models.Group, error)
 	FindAllUserGroups(ctx context.Context, user uint) ([]*models.Group, error)
 	CheckUserIsAdmin(ctx context.Context, userID uint) (bool, error)
+	CheckUserIsGroupMember(ctx context.Context, groupID uint, userID uint) (bool, error)
 	AddUserToGroup(ctx context.Context, group *models.Group, userToAdd *models.User) error
 	RemoveUserFromGroup(ctx context.Context, group *models.Group, userToRemove *models.User) error
 }

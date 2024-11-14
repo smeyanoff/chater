@@ -19,11 +19,10 @@ type chatsResponse struct {
 }
 
 type chatResponse struct {
-	ID       uint              `json:"id"`       // Идентификатор чата
-	Name     string            `json:"name"`     // Название чата
-	Members  []memberResponse  `json:"members"`  // Список участников чата
-	Groups   []groupResponse   `json:"groups"`   // Список групп
-	Messages []messageResponse `json:"messages"` // Последние сообщения чата
+	ID      uint             `json:"id"`      // Идентификатор чата
+	Name    string           `json:"name"`    // Название чата
+	Members []memberResponse `json:"members"` // Список участников чата
+	Groups  []groupResponse  `json:"groups"`  // Список групп
 }
 
 type memberResponse struct {

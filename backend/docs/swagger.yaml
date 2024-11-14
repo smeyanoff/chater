@@ -15,11 +15,6 @@ definitions:
         items:
           $ref: '#/definitions/api.memberResponse'
         type: array
-      messages:
-        description: Последние сообщения чата
-        items:
-          $ref: '#/definitions/api.messageResponse'
-        type: array
       name:
         description: Название чата
         type: string
@@ -332,6 +327,36 @@ paths:
       summary: Add a group to a chat
       tags:
       - Chats
+      - V1
+  /v1/chats/{chat_id}/last:
+    get:
+      description: Возвращает последнее сообщения чата
+      parameters:
+      - description: ID чата
+        in: path
+        name: chat_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Сообщение
+          schema:
+            $ref: '#/definitions/api.messageResponse'
+        "400":
+          description: Ошибка в запросе
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+        "500":
+          description: Ошибка на стороне сервера
+          schema:
+            $ref: '#/definitions/api.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: Получение последнего сообщения чата
+      tags:
+      - Messages
       - V1
   /v1/chats/{chat_id}/messages:
     get:

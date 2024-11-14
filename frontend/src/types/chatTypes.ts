@@ -15,6 +15,5 @@ export interface Chat {
   id: number;
   name: string;
   members: User[];
-  groups: Group[];
-  messages: ChatMessage[];
+  groups?: Group[];
 }

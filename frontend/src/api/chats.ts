@@ -21,6 +21,15 @@ export const getChatMessages = async (chatId: number): Promise<ChatMessage[]> =>
   return data.messages
 }
 
+export const getLastChatMessage = async (chatId: number): Promise<ChatMessage> => {
+  const { data } = await apiClient.get<ChatMessage>(`/v1/chats/${chatId}/last`,
+    {
+      withCredentials: true
+    }
+  )
+  return data
+}
+
 export const createChat = async (chatName: string, groupID?: number): Promise<Chat> => {
   const requestData: any = {
     name: chatName

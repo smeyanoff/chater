@@ -22,11 +22,11 @@ func (r *gormChatRepository) Save(ctx context.Context, chat *models.Chat) error 
 	return r.db.WithContext(ctx).Create(chat).Error
 }
 
-func (r *gormChatRepository) FindChatByID(ctx context.Context, chatID uint) (*models.Chat, error) {
-	var chat models.Chat
+func (r *gormChatRepository) GetChatByID(ctx context.Context, chatID uint) (*models.Chat, error) {
+	var chat *models.Chat
 	if err := r.db.WithContext(ctx).
 		Preload("ChatUsers").
-		Preload("Messages").
+		Preload("ChatGroups").
 		First(&chat, chatID).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, errors.New("chat not found")
@@ -34,22 +34,20 @@ func (r *gormChatRepository) FindChatByID(ctx context.Context, chatID uint) (*mo
 			return nil, err
 		}
 	}
-
-	return &chat, nil
+	return chat, nil
 }
 
-func (r *gormChatRepository) FindAllChatsWithLastMessage(ctx context.Context, userID uint) ([]*models.Chat, error) {
+func (r *gormChatRepository) GetUserChats(ctx context.Context, userID uint) ([]*models.Chat, error) {
 	var chats []*models.Chat
 
-	// Загрузить чаты пользователя с последним сообщением для каждого чата
 	err := r.db.WithContext(ctx).
 		Joins("JOIN chat_users ON chat_users.chat_id = chats.id").
 		Preload("ChatUsers").
-		Preload("ChatGroups").
-		Preload("Messages", func(db *gorm.DB) *gorm.DB {
-			return db.Joins("JOIN (SELECT chat_id, MAX(created_at) AS max_created_at FROM messages GROUP BY chat_id) last_messages ON messages.chat_id = last_messages.chat_id AND messages.created_at = last_messages.max_created_at")
+		Preload("ChatGroups", func(db *gorm.DB) *gorm.DB {
+			// Указываем таблицу groups, которая соединяется с group_users
+			return db.Joins("JOIN group_users ON group_users.group_id = groups.id").
+				Where("group_users.user_id = ?", userID)
 		}).
-		Preload("Messages.Sender").
 		Where("chat_users.user_id = ?", userID).
 		Find(&chats).Error
 

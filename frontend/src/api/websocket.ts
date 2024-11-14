@@ -1,4 +1,3 @@
-// websocket.ts
 class WebSocketClient {
   private socket: WebSocket | null = null;
   private readonly messageListeners: ((message: unknown) => void)[] = [];
@@ -32,7 +31,13 @@ class WebSocketClient {
 
   // Добавляем возможность подписки на получение сообщений
   onMessage (listener: (message: unknown) => void): void {
+    this.clearMessageListeners() // Очищаем все предыдущие подписки
     this.messageListeners.push(listener)
+  }
+
+  // Очистка всех подписчиков сообщений
+  private clearMessageListeners (): void {
+    this.messageListeners.length = 0
   }
 
   // Отправка сообщения через WebSocket

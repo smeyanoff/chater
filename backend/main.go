@@ -62,7 +62,7 @@ func main() {
 	// Serices
 	authService := service.NewAuthService(userRepo, cfg.Auth.JWTKey, cfg.Auth.JWTKeyExpirationTimeH)
 	chatService := service.NewChatService(chatRepo, userRepo, groupRepo)
-	messageService := service.NewMessageService(messageRepo)
+	messageService := service.NewMessageService(messageRepo, chatRepo, groupRepo)
 	groupService := service.NewGroupService(groupRepo, userRepo)
 
 	// Controllers
@@ -108,6 +108,7 @@ func main() {
 
 	apiV1.GET("/chats/:chat_id/messages/ws", messageController.MessageWebSocketController)
 	apiV1.GET("/chats/:chat_id/messages", messageController.GetMessages)
+	apiV1.GET("/chats/:chat_id/last", messageController.GetLastMessage)
 
 	// groups
 

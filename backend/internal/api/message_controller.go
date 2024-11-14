@@ -174,9 +174,11 @@ func broadcastMessageToChat(chatID uint, response *entities.Message) {
 // @Security BearerAuth
 // @Router /v1/chats/{chat_id}/messages [get]
 func (mc *MessageController) GetMessages(ctx *gin.Context) {
+	logging.Logger.Debug("Get messaged response...")
 	chatID := ctx.Param("chat_id")
 	userID, exists := ctx.Get("user_id") // Получаем ID пользователя (например, из JWT)
 	if !exists {
+		logging.Logger.Error(ErrUnauthorized)
 		ctx.JSON(http.StatusUnauthorized, errorResponse{Error: ErrUnauthorized})
 		return
 	}
@@ -184,15 +186,58 @@ func (mc *MessageController) GetMessages(ctx *gin.Context) {
 	// Преобразование строки chatID в uint
 	chatIDUint, err := strconv.ParseUint(chatID, 10, 32)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse{Error: "Invalid chat ID"})
+		logging.Logger.Error(ErrInvalidChatID)
+		ctx.JSON(http.StatusBadRequest, errorResponse{Error: ErrInvalidChatID})
 		return
 	}
 
-	messages, err := mc.messageService.GetMessages(ctx, uint(chatIDUint))
+	messages, err := mc.messageService.GetMessages(ctx, uint(chatIDUint), userID.(uint))
 	if err != nil {
+		logging.Logger.Error(err.Error())
 		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: "Failed to load messages"})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, messagesResponse{Messages: mapMessages(messages, userID.(uint))})
+	logging.Logger.Debug("Get messages succeded")
+}
+
+// GetMessages godoc
+// @Summary Получение последнего сообщения чата
+// @Description Возвращает последнее сообщения чата
+// @Tags Messages, V1
+// @Produce  json
+// @Param  chat_id path uint true "ID чата"
+// @Success 200 {object} messageResponse "Сообщение"
+// @Failure 400 {object} errorResponse "Ошибка в запросе"
+// @Failure 500 {object} errorResponse "Ошибка на стороне сервера"
+// @Security BearerAuth
+// @Router /v1/chats/{chat_id}/last [get]
+func (mc *MessageController) GetLastMessage(ctx *gin.Context) {
+	logging.Logger.Debug("Get last message response...")
+	chatID := ctx.Param("chat_id")
+	userID, exists := ctx.Get("user_id")
+	if !exists {
+		logging.Logger.Error(ErrUnauthorized)
+		ctx.JSON(http.StatusUnauthorized, errorResponse{Error: ErrUnauthorized})
+		return
+	}
+
+	// Преобразование строки chatID в uint
+	chatIDUint, err := strconv.ParseUint(chatID, 10, 32)
+	if err != nil {
+		logging.Logger.Error(err.Error())
+		ctx.JSON(http.StatusBadRequest, errorResponse{Error: ErrInvalidChatID})
+		return
+	}
+
+	message, err := mc.messageService.GetLastMessageByChatID(ctx, uint(chatIDUint), userID.(uint))
+	if err != nil {
+		logging.Logger.Error(err.Error())
+		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: "Failed to load message"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, mapMessage(message, userID.(uint)))
+	logging.Logger.Debug("Getting last message succeded")
 }

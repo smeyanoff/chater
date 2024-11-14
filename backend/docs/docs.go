@@ -271,6 +271,53 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/chats/{chat_id}/last": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает последнее сообщения чата",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Messages",
+                    "V1"
+                ],
+                "summary": "Получение последнего сообщения чата",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID чата",
+                        "name": "chat_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Сообщение",
+                        "schema": {
+                            "$ref": "#/definitions/api.messageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Ошибка в запросе",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка на стороне сервера",
+                        "schema": {
+                            "$ref": "#/definitions/api.errorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/chats/{chat_id}/messages": {
             "get": {
                 "security": [
@@ -664,13 +711,6 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/api.memberResponse"
-                    }
-                },
-                "messages": {
-                    "description": "Последние сообщения чата",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/api.messageResponse"
                     }
                 },
                 "name": {

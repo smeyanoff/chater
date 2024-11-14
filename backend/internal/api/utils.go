@@ -53,11 +53,10 @@ func mapChats(chats []*entities.Chat, userID uint) []chatResponse {
 
 func mapChat(chat *entities.Chat, userID uint) chatResponse {
 	return chatResponse{
-		ID:       chat.ID,
-		Name:     chat.Name.String(),
-		Groups:   mapGroups(chat.ChatGroups, userID),
-		Members:  mapMembers(chat.ChatUsers),
-		Messages: mapMessages(chat.Messages, userID),
+		ID:      chat.ID,
+		Name:    chat.Name.String(),
+		Groups:  mapGroups(chat.ChatGroups, userID),
+		Members: mapMembers(chat.ChatUsers),
 	}
 }
 

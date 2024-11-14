@@ -110,6 +110,26 @@ func (r *gormGroupRepository) CheckUserIsAdmin(ctx context.Context, userID uint)
 	return true, nil // Пользователь найден в группе "admins", возвращаем true
 }
 
+func (r *gormGroupRepository) CheckUserIsGroupMember(ctx context.Context, groupID uint, userID uint) (bool, error) {
+	var group models.Group
+
+	// Присоединяем таблицу пользователей и проверяем, состоит ли пользователь с указанным userID в группе "admins"
+	err := r.db.WithContext(ctx).
+		Preload("GroupUsers").
+		Joins("JOIN group_users ON group_users.group_id = groups.id AND group_users.user_id = ?", userID).
+		Where("groups.id = ?", groupID).
+		First(&group).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
+}
+
 // Удалить пользователя из группы
 func (r *gormGroupRepository) RemoveUserFromGroup(ctx context.Context, group *models.Group, userToRemove *models.User) error {
 

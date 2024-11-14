@@ -36,3 +36,16 @@ func (r *gormMessageRepository) GetMessagesByChatID(ctx context.Context, chatID 
 	err := r.db.WithContext(ctx).Preload("Sender").Where("chat_id = ?", chatID).Order("created_at asc").Find(&messages).Error
 	return messages, err
 }
+
+func (r *gormMessageRepository) GetLastMessageByChatID(ctx context.Context, chatID uint) (*entities.Message, error) {
+	var message entities.Message
+	err := r.db.WithContext(ctx).
+		Preload("Sender").
+		Where("chat_id = ?", chatID).
+		Order("created_at DESC").
+		Last(&message).Error
+	if err != nil {
+		return nil, err
+	}
+	return &message, nil
+}

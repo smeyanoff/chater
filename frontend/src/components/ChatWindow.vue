@@ -3,7 +3,7 @@
     <header class="chat-header">{{ chat.name }}</header>
     <div class="messages-container" ref="messagesContainer">
       <div
-        v-for="(message, index) in messages"
+        v-for="(message, index) in messages || []"
         :key="message.id"
         :class="['message', { 'message-outgoing': message.isCurrent, 'message-incoming': !message.isCurrent }]"
       >
@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onBeforeUnmount, watch, nextTick, onMounted } from 'vue'
+import { defineComponent, ref, onBeforeUnmount, watch, nextTick, onMounted, PropType } from 'vue'
 import { Chat, ChatMessage } from '@/types'
 import { webSocketClient } from '@/api/websocket'
 
@@ -43,8 +43,8 @@ export default defineComponent({
       required: false
     },
     messages: {
-      type: Array as () => ChatMessage[],
-      required: true
+      type: Array as PropType<ChatMessage[] | null>,
+      default: () => [] // Устанавливаем пустой массив по умолчанию, если messages равно null
     }
   },
   emits: ['messageSent'],
@@ -104,11 +104,9 @@ export default defineComponent({
 
     // Автоматическая прокрутка к последнему сообщению
     const scrollToBottom = () => {
-      nextTick(() => {
-        if (messagesContainer.value) {
-          messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
-        }
-      })
+      if (messagesContainer.value) {
+        messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
+      }
     }
 
     // Формат времени для сообщений
@@ -121,10 +119,9 @@ export default defineComponent({
 
     // Следим за изменениями в сообщениях и скроллим вниз
     watch(
-      () => props.messages.length,
-      async () => {
-        await nextTick()
-        scrollToBottom()
+      () => props.messages ? props.messages.length : 0, // Проверяем, что messages не null
+      () => {
+        nextTick(() => scrollToBottom())
       }
     )
 
@@ -155,7 +152,7 @@ export default defineComponent({
             if (webSocketClient.isConnected()) {
               // Подписываемся на получение сообщений
               webSocketClient.onMessage((message: unknown) => {
-              // Проверяем, является ли message объектом и имеет ли нужные поля
+                // Проверяем, является ли message объектом и имеет ли нужные поля
                 if (isChatMessage(message)) {
                   const chatMessage = message as ChatMessage
                   console.log('New message received:', chatMessage.content)

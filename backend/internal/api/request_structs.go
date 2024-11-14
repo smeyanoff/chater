@@ -18,12 +18,12 @@ type sendMessageRequest struct {
 }
 
 type createChatRequest struct {
-	Name string `json:"name" binding:"required"` // Название чата
+	Name    string `json:"name" binding:"required"` // Название чата
+	GroupID uint   `json:"groupID"`
 }
 
 type createGroupRequest struct {
-	Name    string `json:"name" binding:"required"` // Название группы
-	GroupID uint   `json:"groupID"`
+	Name string `json:"name" binding:"required"` // Название группы
 }
 
 type userAddToGroupRequest struct {

@@ -19,10 +19,11 @@
           >
             <div class="chat-item">
               <h3>{{ chat.name }}</h3>
-              <div v-if="chat.messages" class="last-message-container">
-                <span class="message-sender">{{ messageSender(chat.messages[0]) }}:</span>
-                <span>{{ chat.messages[0].content }}</span>
+              <div v-if="lastMessages[chat.id]" class="last-message-container">
+                <span class="message-sender">{{ messageSender(lastMessages[chat.id]) }}:</span>
+                <span>{{ lastMessages[chat.id]?.content }}</span>
               </div>
+              <div v-else class="last-message-container">Нет сообщений</div>
             </div>
           </li>
         </ul>
@@ -46,10 +47,11 @@
           >
             <div class="chat-item">
               <h3>{{ chat.name }}</h3>
-              <div class="last-message-container">
-                <span class="message-sender">{{ messageSender(chat.messages[chat.messages.length - 1]) }}:</span>
-                <span>{{ chat.messages[chat.messages.length - 1].content }}</span>
+              <div v-if="lastMessages[chat.id]" class="last-message-container">
+                <span class="message-sender">{{ messageSender(lastMessages[chat.id]) }}:</span>
+                <span>{{ lastMessages[chat.id]?.content }}</span>
               </div>
+              <div v-else class="last-message-container">Нет сообщений</div>
             </div>
           </li>
         </ul>
@@ -84,6 +86,10 @@ export default defineComponent({
       type: Array as () => Group[],
       required: true
     },
+    lastMessages: {
+      type: Object as () => Record<number, ChatMessage | null>,
+      required: true
+    },
     selectedChatId: {
       type: Number,
       required: false
@@ -101,17 +107,19 @@ export default defineComponent({
       emit('selectChat', chat)
     }
 
-    const messageSender = (message: ChatMessage | undefined) => {
+    const messageSender = (message: ChatMessage | null) => {
       if (!message) return ''
       return message.isCurrent ? 'Вы' : message.sender
     }
 
+    // Фильтруем личные чаты
     const personalChats = computed(() => {
-      return props.chats.filter(chat => chat.groups.length === 0)
+      return props.chats.filter(chat => !chat.groups || chat.groups.length === 0)
     })
 
+    // Фильтруем чаты по группе
     const groupChats = (groupId: number) => {
-      return props.chats.filter(chat => chat.groups.some(group => group.id === groupId))
+      return props.chats.filter(chat => chat.groups?.some(group => group.id === groupId))
     }
 
     const toggleGroup = (groupId: number | 'personal') => {

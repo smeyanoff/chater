@@ -1,11 +1,13 @@
 <template>
   <div class="messenger-view">
-    <!-- Компонент списка чатов, передаем группы и чаты -->
+    <!-- Компонент списка чатов, передаем группы, чаты и последние сообщения -->
     <ChatList
       :chats="chats"
       :groups="groups"
+      :lastMessages="lastMessages"
       :selectedChatId="selectedChat?.id"
       @selectChat="selectChat"
+      @updateChats="updateChats"
     />
     <!-- Окно чата для выбранного чата -->
     <ChatWindow
@@ -32,23 +34,46 @@ export default defineComponent({
     const chats = ref<Chat[]>([])
     const groups = ref<Group[]>([])
     const selectedChat = ref<Chat | null>(null)
-    const chatMessages = ref<ChatMessage[]>([])
+    const chatMessages = ref<ChatMessage[]>([]) // Инициализация пустым массивом
+    const lastMessages = ref<Record<number, ChatMessage | null>>({}) // Объект для последних сообщений
 
     onMounted(async () => {
-      chats.value = await getAllUserChats()
-      groups.value = await getAllUserGroups() // Загрузка групп
+      try {
+        chats.value = await getAllUserChats() || []
+        groups.value = await getAllUserGroups() || [] // Загрузка групп с обработкой null
+
+        // Инициализация lastMessages для каждого чата
+        for (const chat of chats.value) {
+          const messages = await getChatMessages(chat.id)
+          lastMessages.value[chat.id] = messages.length ? messages[messages.length - 1] : null
+        }
+      } catch (error) {
+        console.error('Ошибка при загрузке чатов, групп или сообщений:', error)
+      }
     })
 
+    // Обработчик выбора чата
     const selectChat = async (chat: Chat) => {
       selectedChat.value = chat
-      chatMessages.value = await getChatMessages(chat.id)
+      try {
+        chatMessages.value = await getChatMessages(chat.id) || []
+      } catch (error) {
+        console.error('Ошибка при загрузке сообщений:', error)
+        chatMessages.value = [] // Устанавливаем пустой массив в случае ошибки
+      }
     }
 
+    const updateChats = (chat: Chat) => {
+      chats.value.push(chat)
+    }
+
+    // Метод для добавления сообщения
     const addMessage = (message: ChatMessage) => {
       chatMessages.value.push(message)
-      const chatIndex = chats.value.findIndex(chat => chat.id === selectedChat.value?.id)
-      if (chatIndex !== -1) {
-        chats.value[chatIndex].messages = [message]
+
+      // Обновляем последнее сообщение для выбранного чата в объекте lastMessages
+      if (selectedChat.value) {
+        lastMessages.value[selectedChat.value.id] = message
       }
     }
 
@@ -57,17 +82,19 @@ export default defineComponent({
       groups,
       selectedChat,
       chatMessages,
+      lastMessages,
       addMessage,
-      selectChat
+      selectChat,
+      updateChats
     }
   }
 })
 </script>
 
-  <style scoped>
-  .messenger-view {
-    display: flex;
-    height: 100%;
-    overflow: hidden;
-  }
-  </style>
+<style scoped>
+.messenger-view {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+</style>

@@ -87,7 +87,7 @@ func (cc *ChatService) CreateChat(ctx context.Context, chatName string, ownerID 
 * - error: an error if any operation fails
  */
 func (cc *ChatService) DeleteChat(ctx context.Context, userID uint, chatID uint) error {
-	chat, err := cc.chatRepo.FindChatByID(ctx, chatID)
+	chat, err := cc.chatRepo.GetChatByID(ctx, chatID)
 	if err != nil {
 		return err
 	}
@@ -120,7 +120,7 @@ func (cc *ChatService) AddUserToChat(ctx context.Context, userToAddID uint, chat
 		return err
 	}
 
-	chat, err := cc.chatRepo.FindChatByID(ctx, chatID)
+	chat, err := cc.chatRepo.GetChatByID(ctx, chatID)
 	if err != nil {
 		return err
 	}
@@ -155,7 +155,7 @@ func (cc *ChatService) DeleteUserFromChat(ctx context.Context, ownerID uint, use
 		return err
 	}
 
-	chat, err := cc.chatRepo.FindChatByID(ctx, chatID)
+	chat, err := cc.chatRepo.GetChatByID(ctx, chatID)
 	if err != nil {
 		return err
 	}
@@ -183,7 +183,7 @@ func (cc *ChatService) DeleteUserFromChat(ctx context.Context, ownerID uint, use
  * - error: an error if the operation fails
  */
 func (cc *ChatService) GetUserChats(ctx context.Context, userID uint) ([]*models.Chat, error) {
-	chats, err := cc.chatRepo.FindAllChatsWithLastMessage(ctx, userID)
+	chats, err := cc.chatRepo.GetUserChats(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -192,7 +192,7 @@ func (cc *ChatService) GetUserChats(ctx context.Context, userID uint) ([]*models
 
 func (cc *ChatService) AddGroupToChat(ctx context.Context, userID uint, chatID uint, groupID uint) error {
 
-	chat, err := cc.chatRepo.FindChatByID(ctx, chatID)
+	chat, err := cc.chatRepo.GetChatByID(ctx, chatID)
 	if err != nil {
 		return err
 	}
@@ -219,7 +219,7 @@ func (cc *ChatService) AddGroupToChat(ctx context.Context, userID uint, chatID u
 
 func (cc *ChatService) RemoveGroupFromChat(ctx context.Context, userID uint, chatID uint, groupID uint) error {
 
-	chat, err := cc.chatRepo.FindChatByID(ctx, chatID)
+	chat, err := cc.chatRepo.GetChatByID(ctx, chatID)
 	if err != nil {
 		return err
 	}

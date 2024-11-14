@@ -8,8 +8,8 @@ import (
 
 type ChatRepository interface {
 	Save(ctx context.Context, chat *models.Chat) error
-	FindChatByID(ctx context.Context, chatID uint) (*models.Chat, error)
-	FindAllChatsWithLastMessage(ctx context.Context, userID uint) ([]*models.Chat, error)
+	GetChatByID(ctx context.Context, chatID uint) (*models.Chat, error)
+	GetUserChats(ctx context.Context, userID uint) ([]*models.Chat, error)
 	AddChatUser(ctx context.Context, chat *models.Chat, userToAdd *models.User) error
 	RemoveChatUser(ctx context.Context, chat *models.Chat, userToRemove *models.User) error
 	Delete(ctx context.Context, chatID uint) error
