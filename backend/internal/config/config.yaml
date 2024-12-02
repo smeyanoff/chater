@@ -1,0 +1,31 @@
+app:
+  port: "8080"
+  host: "localhost"
+  adminlogin: "admin"
+  adminemail: "admin@admin.com"
+  adminpwd: "admin123"
+
+db:
+  port: 5432
+  host: "localhost"
+  table: "mytable"
+  user: "dbuser"
+  pwd: "dbpassword"
+
+auth:
+  jwtkey: "your-secret-jwt-key"
+  jwtkeyexpirationtimeh: 72
+  openaikey: "your-openai-api-key"
+
+cors:
+  alloworigins:
+    - "http://localhost:3000"
+    - "http://localhost:54321"
+  allowmethods:
+    - "GET"
+    - "POST"
+    - "PUT"
+  allowheaders:
+    - "Content-Type"
+    - "Authorization"
+  allowcredentials: true

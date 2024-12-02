@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${CHATER_DB_USER}
+      - POSTGRES_PASSWORD=${CHATER_DB_PWD}
+      - POSTGRES_DB=${CHATER_DB_TABLE}
+      - POSTGRES_PORT=${CHATER_DB_PORT}
+      - POSTGRES_HOST=${CHATER_DB_HOST}
+    ports:
+      - "${CHATER_DB_PORT}:${CHATER_DB_PORT}"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - chater
+
+  backend:
+    build: ./backend
+    env_file:
+      - .env
+    ports:
+      - "${CHATER_APP_PORT}:${CHATER_APP_PORT}"
+    depends_on:
+      - db
+    networks:
+      - chater
+  
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #   environment:
+  #     - __VUE_APP_API_URL__=http://${CHATER_APP_HOST}:${CHATER_APP_PORT}
+  #   ports:
+  #     - "3000:80"
+  #   depends_on:
+  #     - db
+  #     - backend
+  #   networks:
+  #     - chater
+
+volumes:
+  db_data:
+
+networks:
+  chater:
+    driver: bridge

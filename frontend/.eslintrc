@@ -1,0 +1,10 @@
+{
+    "env": {
+      "browser": true,
+      "node": true
+    },
+    "extends": [
+      "@vue/standard",
+      "@vue/typescript/recommended"
+    ]
+  }

@@ -1,0 +1,36 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: Arial, sans-serif;
+  }
+  
+  button {
+    cursor: pointer;
+    padding: 10px;
+    background-color: #e0e0e0;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
+
+  button.active {
+    background-color: #3b30e5;
+    color: white;
+    border: 1px solid #ccc;
+    border-bottom: none;
+  }
+  
+  button:not(.active):hover {
+    background-color: #9c9c9c;
+  }
+
+  ul {
+    list-style: none; /* Отключаем маркеры списка */
+    padding: 0;       /* Убираем стандартные отступы */
+    margin: 0;        /* Убираем стандартные внешние отступы */
+  }
+  
+  /* Добавляй другие общие стили, которые будут доступны по всему приложению */
+  
