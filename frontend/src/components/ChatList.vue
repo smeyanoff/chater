@@ -251,14 +251,16 @@ export default defineComponent({
 
 /* Стиль для элементов чатов */
 .chat-item {
-  padding: 15px;
+  padding: 3px;
   padding-left: 10px;
   border-radius: 4px;
+  margin-top: 2px;
   transition: background-color 0.3s ease;
 }
 
 .chat-item h3 {
-  margin-top: 5px;
+  margin-top: 3px;
+  margin-bottom: 5px;
 }
 
 .active .chat-item {
@@ -310,11 +312,12 @@ export default defineComponent({
   width: 90%;
   max-width: 400px;
   text-align: center;
+  position: relative;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .modal-content input {
-  width: 100%;
+  width: 90%;
   padding: 10px;
   margin-top: 10px;
   margin-bottom: 20px;
@@ -323,9 +326,10 @@ export default defineComponent({
 }
 
 .modal-content button {
-  padding: 10px 15px;
+  padding: 10px 10px;
   margin: 5px;
   cursor: pointer;
+  font: 1em sans-serif;
 }
 
 .modal-content button:first-of-type {

@@ -29,6 +29,9 @@ definitions:
     type: object
   api.createChatRequest:
     properties:
+      groupID:
+        description: ID группы, к которой принадлежит чат. Может быть NULL
+        type: integer
       name:
         description: Название чата
         type: string
@@ -37,8 +40,6 @@ definitions:
     type: object
   api.createGroupRequest:
     properties:
-      groupID:
-        type: integer
       name:
         description: Название группы
         type: string

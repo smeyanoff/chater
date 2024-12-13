@@ -44,8 +44,10 @@ export default defineComponent({
 
         // Инициализация lastMessages для каждого чата
         for (const chat of chats.value) {
-          const messages = await getChatMessages(chat.id)
-          lastMessages.value[chat.id] = messages.length ? messages[messages.length - 1] : null
+          const messages = await getChatMessages(chat.id) || []
+          lastMessages.value[chat.id] = Array.isArray(messages) && messages.length
+            ? messages[messages.length - 1]
+            : null
         }
       } catch (error) {
         console.error('Ошибка при загрузке чатов, групп или сообщений:', error)

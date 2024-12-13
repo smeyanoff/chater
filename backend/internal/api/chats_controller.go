@@ -84,7 +84,7 @@ func (cc *ChatController) CreateChat(ctx *gin.Context) {
 		return
 	}
 
-	chat, err := cc.chatService.CreateChat(ctx, request.Name, ownerID.(uint))
+	chat, err := cc.chatService.CreateChat(ctx, request.Name, ownerID.(uint), request.GroupID)
 	if err != nil {
 		logging.Logger.Error(fmt.Sprintf("Create chat error: %s", err.Error()))
 		ctx.JSON(http.StatusInternalServerError, errorResponse{Error: "Failed to create chat"})

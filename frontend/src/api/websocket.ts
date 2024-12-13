@@ -8,17 +8,17 @@ class WebSocketClient {
       this.socket = new WebSocket(url)
 
       this.socket.onopen = () => {
-        console.log('WebSocket соединение установлено')
+        console.log('WebSocket connection is opened')
         resolve()
       }
 
       this.socket.onerror = (event) => {
-        const errorMessage = event instanceof ErrorEvent ? event.message : 'Ошибка WebSocket'
+        const errorMessage = event instanceof ErrorEvent ? event.message : 'WebSocket Error'
         reject(new Error(errorMessage))
       }
 
       this.socket.onclose = () => {
-        console.log('WebSocket соединение закрыто')
+        console.log('WebSocket is closed')
       }
 
       // Подписка на входящие сообщения

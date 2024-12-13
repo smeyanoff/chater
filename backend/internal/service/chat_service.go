@@ -55,7 +55,7 @@ func (cc *ChatService) checkRights(ctx context.Context, ownerID uint, userID uin
 * Returns:
 * - A pointer to the newly created ChatService instance.
  */
-func (cc *ChatService) CreateChat(ctx context.Context, chatName string, ownerID uint) (*models.Chat, error) {
+func (cc *ChatService) CreateChat(ctx context.Context, chatName string, ownerID uint, groupID *uint) (*models.Chat, error) {
 	validatedChatName, err := valueobject.NewChatName(chatName)
 	if err != nil {
 		return nil, err
@@ -73,6 +73,16 @@ func (cc *ChatService) CreateChat(ctx context.Context, chatName string, ownerID 
 	}
 	if err := cc.chatRepo.Save(ctx, newChat); err != nil {
 		return nil, err
+	}
+
+	if groupID != nil {
+		group, err := cc.groupRepo.FindGroupByID(ctx, *groupID)
+		if err != nil {
+			return nil, err
+		}
+		if err := cc.chatRepo.AddGroup(ctx, newChat, group); err != nil {
+			return nil, err
+		}
 	}
 	return newChat, nil
 }

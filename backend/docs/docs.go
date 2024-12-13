@@ -737,6 +737,10 @@ const docTemplate = `{
                 "name"
             ],
             "properties": {
+                "groupID": {
+                    "description": "ID группы, к которой принадлежит чат. Может быть NULL",
+                    "type": "integer"
+                },
                 "name": {
                     "description": "Название чата",
                     "type": "string"
@@ -749,9 +753,6 @@ const docTemplate = `{
                 "name"
             ],
             "properties": {
-                "groupID": {
-                    "type": "integer"
-                },
                 "name": {
                     "description": "Название группы",
                     "type": "string"

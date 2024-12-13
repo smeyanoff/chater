@@ -1,6 +1,11 @@
 <template>
   <section v-if="chat" class="chat-window">
-    <header class="chat-header">{{ chat.name }}</header>
+    <!-- Заголовок чата -->
+    <header class="chat-header" @click="openChatInfoModal">
+      {{ chat.name }}
+    </header>
+
+    <!-- Контейнер для сообщений -->
     <div class="messages-container" ref="messagesContainer">
       <div
         v-for="(message, index) in messages || []"
@@ -16,6 +21,8 @@
         </div>
       </div>
     </div>
+
+    <!-- Поле ввода сообщения -->
     <footer class="chat-input">
       <textarea
         v-model="newMessage"
@@ -27,89 +34,70 @@
         rows="1"
       />
     </footer>
+
+    <!-- Модальное окно -->
+    <ChatInfoModal
+      :isOpen="isChatInfoModalOpen"
+      :chat="chat"
+      @close="closeChatInfoModal"
+    />
   </section>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onBeforeUnmount, watch, nextTick, onMounted, PropType } from 'vue'
+import { defineComponent, ref, PropType, watch, onBeforeUnmount, nextTick } from 'vue'
 import { Chat, ChatMessage } from '@/types'
 import { webSocketClient } from '@/api/websocket'
+import ChatInfoModal from './ChatInfo/ChatInfoModal.vue'
 
 export default defineComponent({
   name: 'ChatWindow',
+  components: { ChatInfoModal },
   props: {
     chat: {
-      type: Object as () => Chat | null,
-      required: false
+      type: Object as PropType<Chat | null>,
+      required: false,
+      default: null
     },
     messages: {
       type: Array as PropType<ChatMessage[] | null>,
-      default: () => [] // Устанавливаем пустой массив по умолчанию, если messages равно null
+      default: () => []
     }
   },
   emits: ['messageSent'],
   setup (props, { emit }) {
     const newMessage = ref<string>('')
-    const messagesContainer = ref<HTMLElement | null>(null)
+    const isChatInfoModalOpen = ref(false) // Управление видимостью модального окна
     const messageInput = ref<HTMLTextAreaElement | null>(null)
+    const messagesContainer = ref<HTMLElement | null>(null)
 
-    // Закрываем WebSocket перед удалением компонента
-    onBeforeUnmount(() => {
-      if (webSocketClient.isConnected()) {
-        console.log('Closing WebSocket connection...')
-        webSocketClient.close()
-      }
-    })
+    // Открыть модальное окно
+    const openChatInfoModal = () => {
+      isChatInfoModalOpen.value = true
+    }
 
-    // Отправка сообщения через WebSocket
+    // Закрыть модальное окно
+    const closeChatInfoModal = () => {
+      isChatInfoModalOpen.value = false
+    }
+
     const sendMessage = () => {
-      if (newMessage.value.trim() && webSocketClient.isConnected()) {
-        console.log('Sending new message')
-        webSocketClient.send({
-          content: newMessage.value.trim()
-        })
-        newMessage.value = '' // Очищаем поле ввода
-      } else {
-        console.error('WebSocket не подключен или сообщение пустое')
-      }
-    }
-
-    const handleKeydown = (event: KeyboardEvent) => {
-      if (event.key === 'Enter') {
-        if (event.altKey) {
-          // Если нажато Alt + Enter, вставляем перенос строки
-          const cursorPosition = (event.target as HTMLTextAreaElement).selectionStart
-          newMessage.value =
-            newMessage.value.slice(0, cursorPosition) + '\n' + newMessage.value.slice(cursorPosition)
-          autoResize()
-          event.preventDefault() // Останавливаем стандартное поведение Enter
-        } else {
-          // Если просто Enter, то отправляем сообщение
-          sendMessage()
-          autoResize()
-          event.preventDefault() // Останавливаем стандартное поведение Enter
+      try {
+        if (!newMessage.value.trim()) {
+          throw new Error('Message is empty')
+        }
+        if (!webSocketClient.isConnected()) {
+          throw new Error('WebSocket not connected')
+        }
+        webSocketClient.send({ content: newMessage.value.trim() })
+        newMessage.value = ''
+      } catch (error) {
+        if (error instanceof Error) {
+          console.error('Send message error:', error.message)
         }
       }
     }
 
-    // Функция для автоматического изменения высоты textarea
-    const autoResize = () => {
-      nextTick(() => {
-        if (messageInput.value) {
-          messageInput.value.style.height = 'auto' // Сброс высоты для вычисления
-          messageInput.value.style.height = messageInput.value.scrollHeight + 'px'
-        }
-      })
-    }
-
-    // Автоматическая прокрутка к последнему сообщению
-    const scrollToBottom = () => {
-      if (messagesContainer.value) {
-        messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
-      }
-    }
-
-    // Формат времени для сообщений
     const formatTime = (isoString: string) => {
       const date = new Date(isoString)
       const hours = String(date.getHours()).padStart(2, '0')
@@ -117,54 +105,79 @@ export default defineComponent({
       return `${hours}:${minutes}`
     }
 
-    // Следим за изменениями в сообщениях и скроллим вниз
-    watch(
-      () => props.messages ? props.messages.length : 0, // Проверяем, что messages не null
-      () => {
-        nextTick(() => scrollToBottom())
+    const handleKeydown = (event: KeyboardEvent) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        sendMessage()
+        event.preventDefault()
+      }
+    }
+
+    const autoResize = () => {
+      if (messageInput.value) {
+        messageInput.value.style.height = 'auto'
+        messageInput.value.style.height = `${messageInput.value.scrollHeight}px`
+      }
+    }
+
+    onBeforeUnmount(
+      async () => {
+        if (webSocketClient.isConnected()) {
+          webSocketClient.close()
+        }
       }
     )
 
-    onMounted(() => {
-      if (messageInput.value) {
-        autoResize() // Сначала устанавливаем минимальную высоту
-      }
-    })
+    // Автоматическая прокрутка к последнему сообщению
+    const scrollToBottom = () => {
+      nextTick(() => {
+        if (messagesContainer.value) {
+          messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
+        }
+      })
+    }
+
+    // --- Watchers ---
+    watch(
+      () => props.messages,
+      () => {
+        scrollToBottom()
+      },
+      { deep: true }
+    )
 
     // Следим за сменой чатов и открываем новое WebSocket соединение
     watch(
       () => props.chat,
       async (newChat) => {
-        if (newChat) {
-          console.log('Switching to new chat:', newChat.name)
+        if (!newChat) {
+          console.log('No chat selected.')
+          return
+        }
+        if (webSocketClient.isConnected()) {
+          console.log('Closing previous WebSocket connection...')
+          webSocketClient.close()
+        }
+        console.log('Switching to new chat:', newChat)
+        // Открываем новое соединение
+        try {
+          console.log('Opening new WebSocket connection...')
+          await webSocketClient.connect(`ws://localhost:54321/v1/chats/${newChat.id}/messages/ws`)
 
-          // Закрываем старое соединение, если оно существует
           if (webSocketClient.isConnected()) {
-            console.log('Closing previous WebSocket connection...')
-            webSocketClient.close()
+            // Подписываемся на получение сообщений
+            webSocketClient.onMessage((message: unknown) => {
+            // Проверяем, является ли message объектом и имеет ли нужные поля
+              if (isChatMessage(message)) {
+                const chatMessage = message as ChatMessage
+                console.log('New message received:', chatMessage.content)
+                emit('messageSent', chatMessage)
+              } else {
+                console.error('Invalid message format:', message)
+              }
+            })
           }
-
-          // Открываем новое соединение
-          try {
-            console.log('Opening new WebSocket connection...')
-            await webSocketClient.connect(`ws://localhost:54321/v1/chats/${newChat.id}/messages/ws`)
-
-            if (webSocketClient.isConnected()) {
-              // Подписываемся на получение сообщений
-              webSocketClient.onMessage((message: unknown) => {
-                // Проверяем, является ли message объектом и имеет ли нужные поля
-                if (isChatMessage(message)) {
-                  const chatMessage = message as ChatMessage
-                  console.log('New message received:', chatMessage.content)
-                  emit('messageSent', chatMessage)
-                } else {
-                  console.error('Invalid message format:', message)
-                }
-              })
-            }
-          } catch (error) {
-            console.error('WebSocket connection error:', error)
-          }
+        } catch (error) {
+          console.error('WebSocket connection error:', error)
         }
       },
       { immediate: true } // Выполнить при первом рендере
@@ -185,10 +198,14 @@ export default defineComponent({
 
     return {
       newMessage,
-      formatTime,
-      autoResize,
-      handleKeydown,
+      isChatInfoModalOpen,
       messagesContainer,
+      openChatInfoModal,
+      closeChatInfoModal,
+      sendMessage,
+      formatTime,
+      handleKeydown,
+      autoResize,
       messageInput
     }
   }
@@ -196,6 +213,49 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.chat-header:hover {
+  color: #007aff;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  width: 90%;
+}
+
+.modal-content h3 {
+  margin-bottom: 10px;
+}
+
+.modal-content p {
+  margin: 5px 0;
+}
+
+.modal-content ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.modal-content ul li {
+  margin: 5px 0;
+}
 .chat-window {
   flex: 1;
   display: flex;
@@ -207,6 +267,7 @@ export default defineComponent({
   border-bottom: 1px solid #ddd;
   font-size: large;
   font-weight: bold;
+  cursor: pointer;
 }
 
 .messages-container {

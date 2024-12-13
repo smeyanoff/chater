@@ -19,7 +19,7 @@ type sendMessageRequest struct {
 
 type createChatRequest struct {
 	Name    string `json:"name" binding:"required"` // Название чата
-	GroupID uint   `json:"groupID"`
+	GroupID *uint  `json:"groupID,omitempty"`       // ID группы, к которой принадлежит чат. Может быть NULL
 }
 
 type createGroupRequest struct {
