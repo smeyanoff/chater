@@ -14,7 +14,7 @@
 
         <!-- Участники -->
         <div class="section">
-          <button class="section-header" @click="addParticipant">
+          <button class="section-header" @click="openAddParticipantModal">
             <span>Участники</span>
             <span class="participants-count">{{ participantsCount }}</span>
             <span class="material-icons add-icon">person_add</span>
@@ -32,7 +32,7 @@
 
         <!-- Группы -->
         <div class="section">
-          <button class="section-header" @click="addGroup">
+          <button class="section-header" @click="openAddGroupModal">
             <span>Группы</span>
             <span class="groups-count">{{ groupsCount }}</span>
             <span class="material-icons add-icon">group_add</span>
@@ -49,11 +49,22 @@
         </div>
       </div>
     </div>
+
+    <AddParticipantModal
+      :isOpen="isAddParticipantOpen"
+      @close="closeAddParticipantModal"
+    />
+    <AddGroupModal
+      :isOpen="isAddGroupOpen"
+      @close="closeAddGroupModal"
+/>
   </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue'
+import { defineComponent, computed, ref } from 'vue'
 import { Chat } from '@/types'
+import AddParticipantModal from './AddParticipantModal.vue'
+import AddGroupModal from './AddGroupModal.vue'
 
 export default defineComponent({
   name: 'ChatInfoModal',
@@ -68,17 +79,29 @@ export default defineComponent({
     }
   },
   emits: ['close', 'addMember', 'addGroup', 'editChatName'],
+  components: { AddParticipantModal, AddGroupModal },
   setup (props, { emit }) {
+    const isAddParticipantOpen = ref(false)
+    const isAddGroupOpen = ref(false)
+
+    const openAddParticipantModal = () => {
+      isAddParticipantOpen.value = true
+    }
+
+    const openAddGroupModal = () => {
+      isAddGroupOpen.value = true
+    }
+
+    const closeAddParticipantModal = () => {
+      isAddParticipantOpen.value = false
+    }
+
+    const closeAddGroupModal = () => {
+      isAddGroupOpen.value = false
+    }
+
     const closeModal = () => {
       emit('close')
-    }
-
-    const addParticipant = () => {
-      emit('addMember')
-    }
-
-    const addGroup = () => {
-      emit('addGroup')
     }
 
     const editGroupName = () => {
@@ -101,8 +124,12 @@ export default defineComponent({
 
     return {
       closeModal,
-      addParticipant,
-      addGroup,
+      isAddParticipantOpen,
+      isAddGroupOpen,
+      openAddParticipantModal,
+      openAddGroupModal,
+      closeAddParticipantModal,
+      closeAddGroupModal,
       editGroupName,
       participantsCount,
       groupsCount

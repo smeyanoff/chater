@@ -2,6 +2,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import AuthPage from '@/views/AuthPage.vue'
 import ChatView from '@/views/ChatView.vue'
+import AgentList from '@/components/AgentList.vue'
 
 const routes = [
   {
@@ -17,6 +18,12 @@ const routes = [
     path: '/chats',
     name: 'chats', // Имя маршрута для списка чатов
     component: ChatView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/agents',
+    name: 'agents',
+    component: AgentList,
     meta: { requiresAuth: true }
   }
 ]

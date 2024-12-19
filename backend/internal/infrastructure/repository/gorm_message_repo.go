@@ -31,13 +31,13 @@ func (r *gormMessageRepository) Save(ctx context.Context, message *entities.Mess
 }
 
 // Получение всех сообщений по ID чата
-func (r *gormMessageRepository) GetMessagesByChatID(ctx context.Context, chatID uint) ([]*entities.Message, error) {
+func (r *gormMessageRepository) GetMessages(ctx context.Context, chatID uint) ([]*entities.Message, error) {
 	var messages []*entities.Message
 	err := r.db.WithContext(ctx).Preload("Sender").Where("chat_id = ?", chatID).Order("created_at asc").Find(&messages).Error
 	return messages, err
 }
 
-func (r *gormMessageRepository) GetLastMessageByChatID(ctx context.Context, chatID uint) (*entities.Message, error) {
+func (r *gormMessageRepository) GetLastMessage(ctx context.Context, chatID uint) (*entities.Message, error) {
 	var message entities.Message
 	err := r.db.WithContext(ctx).
 		Preload("Sender").

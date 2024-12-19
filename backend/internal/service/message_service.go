@@ -82,7 +82,7 @@ func (s *MessageService) GetMessages(ctx context.Context, chatID uint, userID ui
 	} else if !hasRights {
 		return nil, errors.New(PermissionDeniedError)
 	}
-	return s.messageRepo.GetMessagesByChatID(ctx, chatID)
+	return s.messageRepo.GetMessages(ctx, chatID)
 }
 
 func (s *MessageService) GetLastMessageByChatID(ctx context.Context, chatID uint, userID uint) (*models.Message, error) {
@@ -92,5 +92,5 @@ func (s *MessageService) GetLastMessageByChatID(ctx context.Context, chatID uint
 	} else if !hasRights {
 		return nil, errors.New(PermissionDeniedError)
 	}
-	return s.messageRepo.GetLastMessageByChatID(ctx, chatID)
+	return s.messageRepo.GetLastMessage(ctx, chatID)
 }

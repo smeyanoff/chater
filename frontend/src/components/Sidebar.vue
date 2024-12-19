@@ -9,9 +9,9 @@
             </router-link>
           </li>
           <li>
-            <router-link to="/settings" class="nav-link" active-class="active-link">
+            <router-link to="/agents" class="nav-link" active-class="active-link">
               <span class="material-icons">settings</span>
-              <span> Настройки </span>
+              <span> Агенты </span>
             </router-link>
           </li>
         </ul>
