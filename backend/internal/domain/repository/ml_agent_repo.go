@@ -5,8 +5,8 @@ import (
 	"context"
 )
 
-type AgentRepository interface {
+type MLAgentRepository interface {
 	Save(ctx context.Context, agent *models.Agent) error
 	Delete(ctx context.Context, agentID uint) error
-	AddRoute(ctx context.Context, route *models.AgentRoute) error
+	GetByID(ctx context.Context, agentID uint) (agent *models.Agent, err error)
 }
